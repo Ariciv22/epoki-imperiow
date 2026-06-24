@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Epoki Imperiów - prototyp JS</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <div>
+        <h1>Epoki Imperiów</h1>
+        <p>Świeży prototyp: HTML + CSS + JavaScript, bez npm, bez TypeScript.</p>
+      </div>
+      <div class="turn-box">
+        <span id="roundLabel">Runda 1</span>
+        <span id="playerLabel">Gracz 1</span>
+      </div>
+    </header>
+
+    <main class="layout">
+      <aside class="panel">
+        <section class="card">
+          <h2>Gracz</h2>
+          <div id="playerPanel"></div>
+          <button id="endTurnButton" class="primary">Zakończ turę</button>
+        </section>
+
+        <section class="card">
+          <h2>Wybrany heks</h2>
+          <div id="hexPanel">Kliknij heks na mapie.</div>
+        </section>
+
+        <section class="card">
+          <h2>Akcje</h2>
+          <button id="settleButton" disabled>Załóż stolicę</button>
+          <button id="discoverButton" disabled>Odkryj żeton</button>
+        </section>
+      </aside>
+
+      <section class="board-wrapper">
+        <div id="board" class="board"></div>
+      </section>
+
+      <aside class="panel log-panel">
+        <section class="card">
+          <h2>Dziennik</h2>
+          <div id="log" class="log"></div>
+        </section>
+      </aside>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>
