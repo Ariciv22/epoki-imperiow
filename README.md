@@ -18,6 +18,11 @@ Pierwsze moduły projektu:
 - [05 — Standard wizualny kafli i mapy](docs/05-standard-wizualny-kafli-i-mapy.md)
 - [06 — Pierwsze 12 kafli bazowych](docs/06-pierwsze-12-kafli-bazowych.md)
 - [07 — Layout kafla](docs/07-layout-kafla.md)
+- [08 — Szkielet mapy kontynentalnej](docs/08-szkielet-mapy-kontynentalnej.md)
+
+## Referencje wizualne
+
+- [Mapa 04 — szkielet kontynentu](assets/reference/mapa-04-szkielet-kontynentu.svg)
 
 ## Główne założenia mapy
 
