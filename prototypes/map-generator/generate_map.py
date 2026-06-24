@@ -5,10 +5,11 @@ Epoki Imperiow — prosty generator szkieletu mapy.
 Generator tworzy koncepcyjne mapy SVG:
 - 20 x 14 heksow = 280 pol,
 - jeden duzy nieregularny kontynent,
-- ocean na obrzezach,
+- wiecej ladu niz w pierwszej wersji prototypu,
+- ocean glownie na obrzezach,
 - woda przybrzezna przy ladzie,
 - pasma gor, lasy, jeziora, suchy region i cuda naturalne,
-- losowe starty graczy na ladzie,
+- starty graczy na ladzie,
 - brak zetonow odkryc w promieniu 2 heksow od startu.
 
 To jest prototyp wizualny, nie finalny silnik gry.
@@ -68,6 +69,7 @@ class MapResult:
     discovery_tokens: List[Coord]
     seed: int
     variant: int
+    land_scale: float
 
 
 def neighbors(col: int, row: int) -> Iterable[Coord]:
@@ -100,15 +102,26 @@ def nearest_position(candidates: List[Coord], target: Coord) -> Coord:
     return min(candidates, key=lambda p: hex_distance(p, target))
 
 
-def build_base_continent(rng: random.Random, variant: int) -> TerrainMap:
-    """Tworzy ocean i nieregularny glowny lad."""
+def build_base_continent(rng: random.Random, variant: int, land_scale: float) -> TerrainMap:
+    """Tworzy ocean i nieregularny glowny lad.
+
+    land_scale steruje iloscia ladu:
+    - 1.00 daje bardziej morska wersje,
+    - 1.14 jest aktualnym standardem z wiekszym kontynentem,
+    - 1.22 daje bardzo duzo ladu.
+    """
     terrain: TerrainMap = {}
 
-    center_x = (COLS - 1) / 2 + rng.uniform(-0.6, 0.6)
-    center_y = (ROWS - 1) / 2 + rng.uniform(-0.4, 0.4)
-    radius_x = rng.uniform(0.72, 0.93)
-    radius_y = rng.uniform(0.60, 0.77)
-    rotation = rng.uniform(-0.18, 0.18)
+    center_x = (COLS - 1) / 2 + rng.uniform(-0.45, 0.45)
+    center_y = (ROWS - 1) / 2 + rng.uniform(-0.30, 0.30)
+
+    # Wersja 0.2: wiekszy kontynent, mniej pustego oceanu.
+    radius_x = rng.uniform(0.80, 0.98) * land_scale
+    radius_y = rng.uniform(0.68, 0.82) * land_scale
+    radius_x = min(radius_x, 1.13)
+    radius_y = min(radius_y, 0.98)
+
+    rotation = rng.uniform(-0.16, 0.16)
     preset = variant % 10
 
     for row in range(ROWS):
@@ -119,50 +132,57 @@ def build_base_continent(rng: random.Random, variant: int) -> TerrainMap:
             yr = x * math.sin(rotation) + y * math.cos(rotation)
 
             edge_noise = (
-                0.10 * math.sin(col * 1.13 + variant)
-                + 0.10 * math.cos(row * 1.31 + variant * 0.7)
-                + 0.07 * math.sin((col + row) * 0.91 + variant * 1.3)
+                0.08 * math.sin(col * 1.13 + variant)
+                + 0.08 * math.cos(row * 1.31 + variant * 0.7)
+                + 0.06 * math.sin((col + row) * 0.91 + variant * 1.3)
             )
             if preset in (1, 6):
-                edge_noise += 0.10 * math.sin((col - row) * 0.7)
+                edge_noise += 0.07 * math.sin((col - row) * 0.7)
             if preset in (2, 7):
-                edge_noise += 0.08 * math.cos((col + 2 * row) * 0.55)
+                edge_noise += 0.06 * math.cos((col + 2 * row) * 0.55)
 
             value = (xr / radius_x) ** 2 + (yr / radius_y) ** 2 + edge_noise
             is_land = value < 1.0
 
-            # Zatoki / wyciecia brzegu, zeby kontynent nie byl owalem.
+            # Mniejsze zatoki niz w wersji 0.1: kontynent nadal jest nieregularny,
+            # ale nie traci tak duzo heksow ladu.
             bays = []
             if preset in (0, 3, 5, 8):
-                bays.append(col < 4 and 3 <= row <= 8)
+                bays.append(col < 3 and 4 <= row <= 7)
             if preset in (1, 4, 8):
-                bays.append(col > 15 and 6 <= row <= 11)
+                bays.append(col > 16 and 7 <= row <= 10)
             if preset in (2, 6, 9):
-                bays.append(row < 2 and 6 <= col <= 10)
+                bays.append(row < 2 and 7 <= col <= 10)
             if preset in (0, 5, 7):
-                bays.append(row > 11 and 8 <= col <= 14)
+                bays.append(row > 12 and 9 <= col <= 13)
             if preset in (3, 9):
-                bays.append(col > 13 and row < 5)
+                bays.append(col > 16 and row < 4)
             if preset == 6:
-                bays.append(col < 6 and row > 9)
+                bays.append(col < 4 and row > 10)
 
             if any(bays):
+                is_land = False
+
+            # Rogi zostaja bardziej oceaniczne, zeby mapa nie wygladala jak prostokat.
+            if (col < 2 and row < 2) or (col > COLS - 3 and row < 2):
+                is_land = False
+            if (col < 2 and row > ROWS - 3) or (col > COLS - 3 and row > ROWS - 3):
                 is_land = False
 
             terrain[(col, row)] = "plains" if is_land else "ocean"
 
     # Male wyspy / polwyspy jako urozmaicenie, ale nie glowna czesc mapy.
     island_candidates = {
-        0: [(3, 10), (16, 3), (17, 4)],
-        1: [(3, 10), (4, 11), (16, 3)],
-        2: [(15, 11), (16, 11), (2, 5)],
-        3: [(17, 8), (3, 3), (4, 3)],
-        4: [(2, 9), (17, 4), (18, 5)],
-        5: [(16, 10), (17, 10), (5, 2)],
-        6: [(3, 11), (13, 2), (14, 2)],
-        7: [(18, 7), (2, 6), (2, 7)],
-        8: [(4, 11), (15, 2), (16, 2)],
-        9: [(17, 10), (18, 9), (3, 4)],
+        0: [(3, 10), (16, 3), (17, 4), (2, 7)],
+        1: [(3, 10), (4, 11), (16, 3), (17, 8)],
+        2: [(15, 11), (16, 11), (2, 5), (3, 6)],
+        3: [(17, 8), (3, 3), (4, 3), (16, 9)],
+        4: [(2, 9), (17, 4), (18, 5), (3, 8)],
+        5: [(16, 10), (17, 10), (5, 2), (4, 11)],
+        6: [(3, 11), (13, 2), (14, 2), (16, 8)],
+        7: [(18, 7), (2, 6), (2, 7), (16, 3)],
+        8: [(4, 11), (15, 2), (16, 2), (3, 5)],
+        9: [(17, 10), (18, 9), (3, 4), (4, 10)],
     }
     for pos in island_candidates[preset]:
         if pos in terrain:
@@ -306,20 +326,26 @@ def place_discovery_tokens(terrain: TerrainMap, starts: List[Coord], seed: int) 
                 continue
             if any(hex_distance(pos, start) <= 2 for start in starts):
                 continue
-            # Gestosc zetonow: czesc ladowych pol poza startem dostaje znacznik.
             if (col * 3 + row + seed) % 3 != 0:
                 tokens.append(pos)
     return tokens
 
 
-def generate_map(seed: int, variant: int, players: int) -> MapResult:
+def generate_map(seed: int, variant: int, players: int, land_scale: float) -> MapResult:
     rng = random.Random(seed)
-    terrain = build_base_continent(rng, variant)
+    terrain = build_base_continent(rng, variant, land_scale)
     mark_coasts(terrain)
     add_feature_regions(terrain, rng, variant)
     starts = choose_starts(terrain, players)
     discovery_tokens = place_discovery_tokens(terrain, starts, seed)
-    return MapResult(terrain=terrain, starts=starts, discovery_tokens=discovery_tokens, seed=seed, variant=variant)
+    return MapResult(
+        terrain=terrain,
+        starts=starts,
+        discovery_tokens=discovery_tokens,
+        seed=seed,
+        variant=variant,
+        land_scale=land_scale,
+    )
 
 
 def hex_center(col: int, row: int) -> Tuple[float, float]:
@@ -340,29 +366,39 @@ def hex_points(cx: float, cy: float, size: float) -> str:
     return " ".join(f"{x:.1f},{y:.1f}" for x, y in points)
 
 
+def terrain_stats(terrain: TerrainMap) -> Dict[str, int]:
+    stats: Dict[str, int] = {}
+    for terrain_type in terrain.values():
+        stats[terrain_type] = stats.get(terrain_type, 0) + 1
+    return stats
+
+
 def render_svg(result: MapResult, title: str) -> str:
     hex_h = math.sqrt(3) * HEX_SIZE
     x_step = 1.5 * HEX_SIZE
     width = int(MARGIN_X * 2 + (COLS - 1) * x_step + 2 * HEX_SIZE)
     board_height = int(MARGIN_Y * 2 + (ROWS - 1) * hex_h + hex_h + hex_h / 2)
     height = board_height + 92
+    stats = terrain_stats(result.terrain)
+    land_count = sum(stats.get(t, 0) for t in ["plains", "forest", "hills", "mountain", "desert", "lake", "natural"])
+    water_count = stats.get("ocean", 0) + stats.get("coast", 0)
 
     parts: List[str] = []
     parts.append(f'<svg xmlns="http://www.w3.org/2000/svg" width="{width}" height="{height}" viewBox="0 0 {width} {height}">')
     parts.append('<rect width="100%" height="100%" fill="#18354a"/>')
     parts.append(f'<text x="36" y="30" font-family="Arial, sans-serif" font-size="17" fill="#f2efe6" font-weight="bold">{title}</text>')
-    parts.append(f'<text x="36" y="52" font-family="Arial, sans-serif" font-size="12" fill="#d8e8f0">seed={result.seed}, wariant={result.variant}, heksy={COLS}x{ROWS}=280</text>')
+    parts.append(f'<text x="36" y="52" font-family="Arial, sans-serif" font-size="12" fill="#d8e8f0">seed={result.seed}, wariant={result.variant}, land_scale={result.land_scale:.2f}, lad={land_count}, woda={water_count}, heksy={COLS}x{ROWS}=280</text>')
 
     for row in range(ROWS):
         for col in range(COLS):
             pos = (col, row)
-            terrain = result.terrain[pos]
+            terrain_type = result.terrain[pos]
             cx, cy = hex_center(col, row)
-            fill = TERRAIN_COLORS[terrain]
-            stroke = "#26323a" if terrain not in {"ocean", "coast"} else "#1f5975"
+            fill = TERRAIN_COLORS[terrain_type]
+            stroke = "#26323a" if terrain_type not in {"ocean", "coast"} else "#1f5975"
             parts.append(f'<polygon points="{hex_points(cx, cy, HEX_SIZE * 0.96)}" fill="{fill}" stroke="{stroke}" stroke-width="1.1"/>')
-            text_color = "#ffffff" if terrain in {"ocean", "coast", "forest", "mountain", "natural"} else "#1e2a22"
-            parts.append(f'<text x="{cx:.1f}" y="{cy+4:.1f}" font-family="Arial, sans-serif" font-size="9.5" text-anchor="middle" fill="{text_color}" font-weight="bold">{TERRAIN_LABELS[terrain]}</text>')
+            text_color = "#ffffff" if terrain_type in {"ocean", "coast", "forest", "mountain", "natural"} else "#1e2a22"
+            parts.append(f'<text x="{cx:.1f}" y="{cy+4:.1f}" font-family="Arial, sans-serif" font-size="9.5" text-anchor="middle" fill="{text_color}" font-weight="bold">{TERRAIN_LABELS[terrain_type]}</text>')
 
     for col, row in result.discovery_tokens:
         cx, cy = hex_center(col, row)
@@ -384,10 +420,10 @@ def render_svg(result: MapResult, title: str) -> str:
         ("G", "gory", "mountain"), ("J", "jezioro", "lake"), ("P", "suchy", "desert"),
         ("W", "wybrzeze", "coast"), ("O", "ocean", "ocean"), ("CN", "cud", "natural"),
     ]
-    for i, (code, name, terrain) in enumerate(legend_items):
+    for i, (code, name, terrain_type) in enumerate(legend_items):
         x = legend_x + (i % 5) * 133
         y = legend_y + 35 + (i // 5) * 22
-        parts.append(f'<rect x="{x}" y="{y-11}" width="17" height="13" fill="{TERRAIN_COLORS[terrain]}" stroke="#333" stroke-width="0.5"/>')
+        parts.append(f'<rect x="{x}" y="{y-11}" width="17" height="13" fill="{TERRAIN_COLORS[terrain_type]}" stroke="#333" stroke-width="0.5"/>')
         parts.append(f'<text x="{x+23}" y="{y}" font-family="Arial, sans-serif" font-size="11" fill="#2a2620">{code} — {name}</text>')
 
     parts.append("</svg>")
@@ -395,11 +431,14 @@ def render_svg(result: MapResult, title: str) -> str:
 
 
 def write_json(result: MapResult, path: Path) -> None:
+    stats = terrain_stats(result.terrain)
     data = {
         "seed": result.seed,
         "variant": result.variant,
+        "land_scale": result.land_scale,
         "cols": COLS,
         "rows": ROWS,
+        "terrain_stats": stats,
         "starts": [{"col": c, "row": r} for c, r in result.starts],
         "discovery_tokens": [{"col": c, "row": r} for c, r in result.discovery_tokens],
         "terrain": [
@@ -436,7 +475,7 @@ def write_index(output_dir: Path, svg_files: List[Path]) -> None:
 <body>
   <header>
     <h1>Epoki Imperiów — wygenerowane szkielety map</h1>
-    <p>Prototyp: jeden kontynent, ocean na obrzeżach, starty na lądzie, żetony odkryć poza strefą startową.</p>
+    <p>Prototyp 0.2: wiekszy kontynent, mniej oceanu, starty na lądzie, żetony odkryć poza strefą startową.</p>
   </header>
   <main>
     {''.join(cards)}
@@ -452,6 +491,7 @@ def main() -> None:
     parser.add_argument("--seed", type=int, default=1000, help="Seed bazowy")
     parser.add_argument("--count", type=int, default=10, help="Liczba map do wygenerowania")
     parser.add_argument("--players", type=int, default=6, help="Liczba startow graczy")
+    parser.add_argument("--land-scale", type=float, default=1.14, help="Ilosc ladu. 1.00 = mniej ladu, 1.14 = standard, 1.22 = bardzo duzo ladu")
     parser.add_argument("--output", type=Path, default=Path("outputs"), help="Folder wyjsciowy")
     args = parser.parse_args()
 
@@ -461,7 +501,7 @@ def main() -> None:
     for i in range(args.count):
         seed = args.seed + i * 17
         variant = i % 10
-        result = generate_map(seed=seed, variant=variant, players=args.players)
+        result = generate_map(seed=seed, variant=variant, players=args.players, land_scale=args.land_scale)
         number = i + 1
         name = f"mapa_{number:02d}"
         svg_path = args.output / f"{name}.svg"
