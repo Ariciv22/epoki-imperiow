@@ -1,0 +1,109 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="820" viewBox="0 0 1200 820">
+  <title>Epoki Imperiów — przykład szkieletu mapy 04</title>
+  <defs>
+    <pattern id="hexGrid" width="72" height="62" patternUnits="userSpaceOnUse">
+      <path d="M18 0h36l18 31-18 31H18L0 31z" fill="none" stroke="#263947" stroke-width="1.2" opacity="0.65"/>
+      <path d="M54 0h36l18 31-18 31H54L36 31z" fill="none" stroke="#263947" stroke-width="1.2" opacity="0.35" transform="translate(36 31)"/>
+    </pattern>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#0b1720" flood-opacity="0.45"/>
+    </filter>
+  </defs>
+
+  <rect width="1200" height="820" fill="#18354a"/>
+  <rect width="1200" height="820" fill="url(#hexGrid)" opacity="0.7"/>
+
+  <text x="48" y="48" font-family="Arial, sans-serif" font-size="28" fill="#f2efe6" font-weight="700">Epoki Imperiów — szkielet mapy kontynentalnej, wariant 04</text>
+  <text x="48" y="80" font-family="Arial, sans-serif" font-size="16" fill="#d8e8f0">Przykład kierunku: jeden duży kontynent, ocean na obrzeżach, zatoki, starty na dowolnych skrawkach lądu.</text>
+
+  <!-- Woda przybrzeżna / obrys kontynentu -->
+  <path filter="url(#shadow)" fill="#5aa7c8" stroke="#1f5975" stroke-width="4" d="
+    M250 145
+    C335 92 442 112 520 134
+    C590 86 710 104 786 158
+    C875 151 973 209 1000 301
+    C1080 352 1060 464 1002 528
+    C1008 625 905 703 784 684
+    C696 743 566 718 507 663
+    C413 684 303 637 280 548
+    C184 506 148 395 198 316
+    C152 250 177 182 250 145
+    Z"/>
+
+  <!-- Ląd główny -->
+  <path fill="#8fbd68" stroke="#5c7f40" stroke-width="3" d="
+    M287 180
+    C366 135 455 150 530 176
+    C604 132 700 149 760 197
+    C845 190 930 238 953 320
+    C1012 365 991 450 940 506
+    C950 584 866 646 770 629
+    C692 682 584 660 528 609
+    C437 631 344 590 326 515
+    C244 484 216 394 260 328
+    C218 264 229 213 287 180
+    Z"/>
+
+  <!-- Suchy region -->
+  <path fill="#d8bc72" stroke="#a8843d" stroke-width="2" opacity="0.95" d="M776 476 C840 450 912 477 930 535 C892 593 805 598 757 548 C743 519 748 493 776 476 Z"/>
+
+  <!-- Las zachodni -->
+  <path fill="#3f7f4f" stroke="#2e5f39" stroke-width="2" d="M300 340 C365 290 438 312 480 370 C451 438 365 455 307 410 C282 389 280 362 300 340 Z"/>
+
+  <!-- Las północno-wschodni -->
+  <path fill="#3f7f4f" stroke="#2e5f39" stroke-width="2" d="M692 224 C760 193 841 225 862 287 C813 337 724 329 683 274 C672 253 676 237 692 224 Z"/>
+
+  <!-- Góry jako kręgosłup kontynentu -->
+  <g stroke="#555" stroke-width="2">
+    <polygon points="500,250 535,170 570,250" fill="#8a8a86"/>
+    <polygon points="552,300 592,204 635,300" fill="#8a8a86"/>
+    <polygon points="620,352 665,245 710,352" fill="#8a8a86"/>
+    <polygon points="685,405 730,296 776,405" fill="#8a8a86"/>
+    <path d="M535 170 L552 250 L570 250" stroke="#f0f0e4" stroke-width="3" fill="none"/>
+    <path d="M592 204 L610 300 L635 300" stroke="#f0f0e4" stroke-width="3" fill="none"/>
+    <path d="M665 245 L686 352 L710 352" stroke="#f0f0e4" stroke-width="3" fill="none"/>
+    <path d="M730 296 L748 405 L776 405" stroke="#f0f0e4" stroke-width="3" fill="none"/>
+  </g>
+
+  <!-- Jeziora -->
+  <ellipse cx="625" cy="535" rx="70" ry="34" fill="#4f9bc2" stroke="#2a6d8b" stroke-width="2"/>
+  <ellipse cx="770" cy="388" rx="52" ry="28" fill="#4f9bc2" stroke="#2a6d8b" stroke-width="2"/>
+
+  <!-- Cuda naturalne -->
+  <g font-family="Arial, sans-serif" font-weight="700" text-anchor="middle">
+    <circle cx="625" cy="337" r="27" fill="#c58edb" stroke="#784694" stroke-width="3"/>
+    <text x="625" y="343" font-size="15" fill="#fff">CN</text>
+    <circle cx="785" cy="535" r="27" fill="#c58edb" stroke="#784694" stroke-width="3"/>
+    <text x="785" y="541" font-size="15" fill="#fff">CN</text>
+  </g>
+
+  <!-- Możliwe starty graczy -->
+  <g font-family="Arial, sans-serif" font-weight="700" text-anchor="middle">
+    <circle cx="356" cy="250" r="24" fill="#fff7c2" stroke="#a57923" stroke-width="4"/><text x="356" y="257" font-size="18" fill="#6b4312">S1</text>
+    <circle cx="845" cy="295" r="24" fill="#fff7c2" stroke="#a57923" stroke-width="4"/><text x="845" y="302" font-size="18" fill="#6b4312">S2</text>
+    <circle cx="365" cy="530" r="24" fill="#fff7c2" stroke="#a57923" stroke-width="4"/><text x="365" y="537" font-size="18" fill="#6b4312">S3</text>
+    <circle cx="690" cy="620" r="24" fill="#fff7c2" stroke="#a57923" stroke-width="4"/><text x="690" y="627" font-size="18" fill="#6b4312">S4</text>
+    <circle cx="520" cy="220" r="24" fill="#fff7c2" stroke="#a57923" stroke-width="4"/><text x="520" y="227" font-size="18" fill="#6b4312">S5</text>
+    <circle cx="912" cy="430" r="24" fill="#fff7c2" stroke="#a57923" stroke-width="4"/><text x="912" y="437" font-size="18" fill="#6b4312">S6</text>
+  </g>
+
+  <!-- Żetony odkryć — przykładowe rozmieszczenie poza strefami startowymi -->
+  <g font-family="Arial, sans-serif" font-weight="700" text-anchor="middle" fill="#4b3215">
+    <circle cx="420" cy="310" r="12" fill="#d9c38b" stroke="#5d4622" stroke-width="2"/><text x="420" y="316" font-size="16">?</text>
+    <circle cx="560" cy="410" r="12" fill="#d9c38b" stroke="#5d4622" stroke-width="2"/><text x="560" y="416" font-size="16">?</text>
+    <circle cx="710" cy="265" r="12" fill="#d9c38b" stroke="#5d4622" stroke-width="2"/><text x="710" y="271" font-size="16">?</text>
+    <circle cx="790" cy="460" r="12" fill="#d9c38b" stroke="#5d4622" stroke-width="2"/><text x="790" y="466" font-size="16">?</text>
+    <circle cx="510" cy="570" r="12" fill="#d9c38b" stroke="#5d4622" stroke-width="2"/><text x="510" y="576" font-size="16">?</text>
+    <circle cx="870" cy="555" r="12" fill="#d9c38b" stroke="#5d4622" stroke-width="2"/><text x="870" y="561" font-size="16">?</text>
+  </g>
+
+  <!-- Legenda -->
+  <rect x="48" y="710" width="1104" height="72" rx="12" fill="#f3ead6" opacity="0.94"/>
+  <g font-family="Arial, sans-serif" font-size="16" fill="#2a2620">
+    <text x="70" y="738" font-weight="700">Legenda:</text>
+    <text x="160" y="738">S — możliwy start gracza</text>
+    <text x="390" y="738">? — żeton odkryć poza strefą startową</text>
+    <text x="760" y="738">CN — cud naturalny</text>
+    <text x="70" y="765">Mapa referencyjna: kontynent ma być zwarty, nieregularny, z wodą na obrzeżach i terenami specjalnymi w środku.</text>
+  </g>
+</svg>
