@@ -19,6 +19,7 @@ Pierwsze moduły projektu:
 - [06 — Pierwsze 12 kafli bazowych](docs/06-pierwsze-12-kafli-bazowych.md)
 - [07 — Layout kafla](docs/07-layout-kafla.md)
 - [08 — Szkielet mapy kontynentalnej](docs/08-szkielet-mapy-kontynentalnej.md)
+- [09 — Reguły generowania szkieletu mapy](docs/09-reguly-generowania-szkieletu-mapy.md)
 
 ## Referencje wizualne
 
