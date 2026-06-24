@@ -10,7 +10,8 @@ Generator tworzy:
 
 - mapę **20 × 14 heksów**, czyli **280 pól**,
 - jeden duży nieregularny kontynent,
-- ocean na obrzeżach,
+- więcej lądu niż w pierwszej wersji prototypu,
+- ocean głównie na obrzeżach,
 - wodę przybrzeżną przy lądzie,
 - równiny, lasy, wzgórza, góry, jeziora, suchy region i cuda naturalne,
 - starty graczy na lądzie,
@@ -50,6 +51,26 @@ index.html
 python prototypes/map-generator/generate_map.py --count 10 --output outputs/mapy-testowe
 ```
 
+## Przykład: mniej albo więcej lądu
+
+Domyślna wartość to:
+
+```bash
+--land-scale 1.14
+```
+
+Mniej lądu, więcej oceanu:
+
+```bash
+python prototypes/map-generator/generate_map.py --land-scale 1.00 --count 10 --output outputs/mniej-ladu
+```
+
+Więcej lądu, mniej oceanu:
+
+```bash
+python prototypes/map-generator/generate_map.py --land-scale 1.22 --count 10 --output outputs/wiecej-ladu
+```
+
 ## Przykład: inny seed
 
 ```bash
@@ -62,9 +83,25 @@ python prototypes/map-generator/generate_map.py --seed 2200 --count 10 --output 
 python prototypes/map-generator/generate_map.py --players 4 --count 10 --output outputs/4-graczy
 ```
 
+## Czyszczenie wygenerowanych map
+
+W Codespaces możesz usunąć wygenerowane mapy poleceniem:
+
+```bash
+rm -rf outputs/mapy-testowe
+```
+
+Albo wyczyścić wszystkie wygenerowane foldery:
+
+```bash
+rm -rf outputs
+```
+
+Folder `outputs/` jest ignorowany przez Git i nie powinien trafiać do repozytorium.
+
 ## Status
 
-Status: **prototyp 0.1**
+Status: **prototyp 0.2**
 
 Ten generator nie jest jeszcze finalnym narzędziem. Służy do szybkiego testowania szkieletu mapy i rozmieszczenia terenów.
 
