@@ -21,6 +21,10 @@ Pierwsze moduły projektu:
 - [08 — Szkielet mapy kontynentalnej](docs/08-szkielet-mapy-kontynentalnej.md)
 - [09 — Reguły generowania szkieletu mapy](docs/09-reguly-generowania-szkieletu-mapy.md)
 
+## Prototypy
+
+- [Generator szkieletu mapy](prototypes/map-generator/README.md)
+
 ## Referencje wizualne
 
 - [Mapa 04 — szkielet kontynentu](assets/reference/mapa-04-szkielet-kontynentu.svg)
