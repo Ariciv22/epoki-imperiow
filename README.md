@@ -15,6 +15,7 @@ Pierwsze moduły projektu:
 - [02 — Mapa i heksy](docs/02-mapa-i-heksy.md)
 - [03 — Kafle mapy](docs/03-kafle-mapy.md)
 - [04 — Żetony odkryć](docs/04-zetony-odkryc.md)
+- [05 — Standard wizualny kafli i mapy](docs/05-standard-wizualny-kafli-i-mapy.md)
 
 ## Główne założenia mapy
 
