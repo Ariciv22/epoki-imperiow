@@ -8,6 +8,9 @@
   --accent-2: #5aa7c8;
   --danger: #d88a6a;
   --ok: #96d98b;
+  --papyrus: #ead8a8;
+  --papyrus-dark: #b79354;
+  --ink: #3c2a16;
 }
 
 * {
@@ -19,7 +22,9 @@ body {
   min-height: 100vh;
   font-family: Arial, sans-serif;
   color: var(--text);
-  background: var(--bg);
+  background:
+    radial-gradient(circle at 50% 0%, rgba(114, 80, 37, 0.22), transparent 36%),
+    linear-gradient(135deg, #0d1218 0%, #111c25 48%, #070b10 100%);
 }
 
 button {
@@ -29,8 +34,12 @@ button {
   font: inherit;
   font-weight: 700;
   cursor: pointer;
-  background: var(--accent);
+  background:
+    linear-gradient(180deg, #efd98f 0%, #d0aa56 100%);
   color: #2d2411;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.45),
+    0 2px 0 rgba(63, 39, 15, 0.7);
 }
 
 button:hover {
@@ -38,23 +47,68 @@ button:hover {
 }
 
 .topbar {
+  position: relative;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 20px;
   padding: 18px 24px;
-  background: #18354a;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 12% 18%, rgba(255, 219, 134, 0.28), transparent 13%),
+    radial-gradient(circle at 55% 0%, rgba(210, 154, 71, 0.25), transparent 24%),
+    linear-gradient(180deg, rgba(20, 32, 46, 0.84) 0%, rgba(38, 37, 32, 0.88) 58%, rgba(57, 40, 22, 0.96) 100%),
+    repeating-linear-gradient(90deg, rgba(255,255,255,0.05) 0 2px, transparent 2px 38px);
+  border-bottom: 4px solid #8c6531;
+  box-shadow:
+    inset 0 -18px 34px rgba(44, 25, 10, 0.45),
+    0 4px 18px rgba(0, 0, 0, 0.35);
+}
+
+.topbar::before {
+  content: '';
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 38px;
+  opacity: 0.34;
+  background:
+    linear-gradient(135deg, transparent 0 20px, #0a0d10 20px 48px, transparent 48px 100px),
+    linear-gradient(90deg, transparent 0 120px, #0a0d10 120px 128px, transparent 128px 152px, #0a0d10 152px 160px, transparent 160px 230px),
+    linear-gradient(90deg, transparent 0 310px, #0a0d10 310px 365px, transparent 365px 440px),
+    repeating-linear-gradient(90deg, transparent 0 18px, #0a0d10 18px 25px, transparent 25px 58px);
+}
+
+.topbar::after {
+  content: '✦  siedem cudów  ✦  imperia  ✦  odkrycia  ✦';
+  position: absolute;
+  right: 26px;
+  bottom: 6px;
+  color: rgba(246, 219, 145, 0.16);
+  font-family: Georgia, serif;
+  font-size: 18px;
+  letter-spacing: 4px;
+  pointer-events: none;
+}
+
+.topbar > * {
+  position: relative;
+  z-index: 1;
 }
 
 .topbar h1 {
   margin: 0 0 4px;
-  font-size: 28px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 30px;
+  color: #ffe7a3;
+  text-shadow:
+    0 2px 0 #4b2f14,
+    0 0 18px rgba(238, 190, 91, 0.35);
 }
 
 .topbar p {
   margin: 0;
-  color: var(--muted);
+  color: #f1dca3;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.75);
 }
 
 .topbar-actions {
@@ -71,15 +125,51 @@ button:hover {
 }
 
 .panel {
+  position: relative;
   padding: 18px;
-  background: var(--panel);
-  border-right: 1px solid rgba(255, 255, 255, 0.12);
+  color: var(--ink);
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255, 255, 255, 0.30), transparent 12%),
+    radial-gradient(circle at 78% 32%, rgba(129, 83, 35, 0.13), transparent 18%),
+    radial-gradient(circle at 48% 88%, rgba(91, 50, 20, 0.14), transparent 22%),
+    repeating-linear-gradient(3deg, rgba(93, 59, 29, 0.08) 0 2px, transparent 2px 8px),
+    linear-gradient(90deg, #c79d5a 0%, #f1dfad 5%, #ead8a8 48%, #dfc48b 95%, #a97937 100%);
+  border-right: 7px solid #7a4b23;
+  box-shadow:
+    inset -18px 0 28px rgba(73, 42, 15, 0.22),
+    inset 10px 0 16px rgba(255, 242, 196, 0.35),
+    5px 0 16px rgba(0, 0, 0, 0.28);
   overflow: auto;
+}
+
+.panel::before,
+.panel::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 16px;
+  pointer-events: none;
+  background:
+    repeating-linear-gradient(90deg, rgba(82, 47, 19, 0.42) 0 22px, rgba(171, 120, 55, 0.25) 22px 47px),
+    linear-gradient(180deg, #875220, #d1a761);
+}
+
+.panel::before {
+  top: 0;
+}
+
+.panel::after {
+  bottom: 0;
+  transform: rotate(180deg);
 }
 
 .panel h2 {
   margin: 18px 0 10px;
-  font-size: 16px;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 17px;
+  color: #3f2811;
+  text-shadow: 0 1px 0 rgba(255, 244, 205, 0.55);
 }
 
 .panel h2:first-child {
@@ -89,15 +179,21 @@ button:hover {
 .module-box,
 .info-box,
 .log {
-  background: var(--panel-2);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  background:
+    radial-gradient(circle at 24% 20%, rgba(255, 255, 255, 0.20), transparent 20%),
+    repeating-linear-gradient(0deg, rgba(83, 50, 21, 0.06) 0 1px, transparent 1px 7px),
+    linear-gradient(180deg, rgba(255, 241, 191, 0.82), rgba(218, 188, 122, 0.82));
+  border: 1px solid rgba(93, 55, 18, 0.35);
   border-radius: 12px;
   padding: 12px;
+  box-shadow:
+    inset 0 0 18px rgba(112, 69, 22, 0.12),
+    0 2px 3px rgba(74, 42, 12, 0.18);
 }
 
 .module-box p {
   margin: 8px 0 0;
-  color: var(--muted);
+  color: #5a3b1b;
   line-height: 1.4;
 }
 
@@ -112,27 +208,31 @@ button:hover {
   justify-content: space-between;
   gap: 16px;
   padding: 10px 12px;
-  background: var(--panel-2);
+  background:
+    linear-gradient(180deg, rgba(255, 240, 191, 0.86), rgba(212, 177, 105, 0.82));
+  border: 1px solid rgba(93, 55, 18, 0.30);
   border-radius: 10px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.35);
 }
 
 .stats dt {
-  color: var(--muted);
+  color: #6b461d;
 }
 
 .stats dd {
   margin: 0;
   font-weight: 700;
+  color: #2f1d0c;
 }
 
 .info-box {
   min-height: 86px;
-  color: var(--muted);
+  color: #5a3b1b;
   line-height: 1.5;
 }
 
 .info-box strong {
-  color: var(--text);
+  color: #2f1d0c;
 }
 
 .unit-card-title {
@@ -152,19 +252,20 @@ button:hover {
 .unit-stat {
   padding: 8px;
   border-radius: 8px;
-  background: rgba(255, 255, 255, 0.07);
+  background: rgba(82, 49, 18, 0.10);
+  border: 1px solid rgba(82, 49, 18, 0.14);
 }
 
 .unit-stat span {
   display: block;
-  color: var(--muted);
+  color: #795326;
   font-size: 12px;
 }
 
 .unit-stat b {
   display: block;
   margin-top: 2px;
-  color: var(--text);
+  color: #2f1d0c;
 }
 
 .log {
@@ -176,13 +277,16 @@ button:hover {
 
 .log-entry {
   padding: 7px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  color: #2f1d0c;
+  border-bottom: 1px solid rgba(93, 55, 18, 0.18);
 }
 
 .board-wrap {
   overflow: auto;
   padding: 18px;
-  background: radial-gradient(circle at center, #1c4056 0%, #0f1720 72%);
+  background:
+    radial-gradient(circle at center, rgba(81, 50, 25, 0.34) 0%, transparent 44%),
+    linear-gradient(135deg, #0c1117 0%, #151f29 48%, #090d12 100%);
 }
 
 #board {
@@ -190,9 +294,20 @@ button:hover {
   min-width: 920px;
   min-height: 720px;
   background: #16344a;
+  border: 18px solid #3a2414;
+  border-image: repeating-linear-gradient(
+    90deg,
+    #2a160b 0 10px,
+    #5b3519 10px 22px,
+    #8a5a2a 22px 31px,
+    #3b1f0f 31px 42px,
+    #6d421f 42px 56px
+  ) 28;
   border-radius: 16px;
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+  box-shadow:
+    inset 0 0 36px rgba(0, 0, 0, 0.42),
+    0 0 0 4px #1d1007,
+    0 18px 55px rgba(0, 0, 0, 0.48);
 }
 
 .hex {
@@ -211,6 +326,10 @@ button:hover {
   font-weight: 700;
   text-anchor: middle;
   dominant-baseline: middle;
+}
+
+.terrain-decoration {
+  pointer-events: none;
 }
 
 .move-target {
@@ -259,6 +378,6 @@ button:hover {
 
   .panel {
     border-right: 0;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+    border-bottom: 7px solid #7a4b23;
   }
 }
