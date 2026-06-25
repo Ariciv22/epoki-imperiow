@@ -40,6 +40,29 @@ const terrainNames = {
   natural: 'cud naturalny'
 };
 
+const passableTerrain = ['plains', 'forest', 'hills', 'desert', 'natural'];
+
+const unitTemplates = {
+  settler: {
+    name: 'Osadnik',
+    label: 'O',
+    maxHp: 10,
+    attack: 0,
+    defense: 1,
+    maxMove: 2,
+    description: 'Zakłada miasta. Na razie nie walczy.'
+  },
+  warrior: {
+    name: 'Wojownik',
+    label: 'Woj',
+    maxHp: 20,
+    attack: 4,
+    defense: 3,
+    maxMove: 2,
+    description: 'Podstawowa jednostka wojskowa do ochrony i eksploracji.'
+  }
+};
+
 const discoveryPool = [
   'puste pole',
   'stare ruiny',
@@ -51,20 +74,24 @@ const discoveryPool = [
 
 let state = {
   seed: 1000,
+  round: 1,
   terrain: new Map(),
   tokens: new Map(),
   revealed: new Map(),
   starts: [],
   units: [],
+  selectedUnitId: null,
   discoveries: 0,
   showTokens: true
 };
 
 const board = document.querySelector('#board');
 const selectedHex = document.querySelector('#selected-hex');
+const selectedUnitBox = document.querySelector('#selected-unit');
 const logBox = document.querySelector('#log');
 const startValue = document.querySelector('#start-value');
 const discoveriesValue = document.querySelector('#discoveries-value');
+const roundValue = document.querySelector('#round-value');
 
 function key(col, row) {
   return `${col},${row}`;
@@ -221,22 +248,46 @@ function generateTokens(terrain, start) {
   return tokens;
 }
 
+function createUnit(id, templateKey, col, row) {
+  const template = unitTemplates[templateKey];
+  return {
+    id,
+    templateKey,
+    type: templateKey,
+    name: template.name,
+    label: template.label,
+    col,
+    row,
+    hp: template.maxHp,
+    maxHp: template.maxHp,
+    attack: template.attack,
+    defense: template.defense,
+    maxMove: template.maxMove,
+    moveLeft: template.maxMove,
+    description: template.description
+  };
+}
+
 function startNewMap() {
   state.seed += 17;
+  state.round = 1;
   state.terrain = generateTerrain();
   const start = chooseStart(state.terrain);
   state.starts = [start];
   state.units = [
-    { type: 'osadnik', label: 'O', col: start.col, row: start.row },
-    { type: 'wojownik', label: 'Woj', col: start.col, row: start.row }
+    createUnit('unit-settler-1', 'settler', start.col, start.row),
+    createUnit('unit-warrior-1', 'warrior', start.col, start.row)
   ];
+  state.selectedUnitId = null;
   state.tokens = generateTokens(state.terrain, start);
   state.revealed = new Map();
   state.discoveries = 0;
 
+  roundValue.textContent = String(state.round);
   startValue.textContent = `${start.col}, ${start.row}`;
   discoveriesValue.textContent = '0';
   selectedHex.textContent = 'Kliknij heks na mapie.';
+  selectedUnitBox.textContent = 'Kliknij osadnika albo wojownika.';
   logBox.innerHTML = '';
   addLog(`Wygenerowano mapę. Start gracza: ${start.col}, ${start.row}.`);
   render();
@@ -257,9 +308,11 @@ function render() {
     }
   }
 
+  drawMoveTargets();
   if (state.showTokens) drawTokens();
   drawStartMarkers();
   drawUnits();
+  renderSelectedUnitPanel();
 }
 
 function drawHex(col, row) {
@@ -275,7 +328,7 @@ function drawHex(col, row) {
     'data-row': row
   });
 
-  polygon.addEventListener('click', () => selectHex(col, row));
+  polygon.addEventListener('click', () => handleHexClick(col, row));
   board.appendChild(polygon);
 
   const label = createSvgElement('text', {
@@ -286,6 +339,27 @@ function drawHex(col, row) {
   });
   label.textContent = terrainLabels[type];
   board.appendChild(label);
+}
+
+function drawMoveTargets() {
+  const selected = getSelectedUnit();
+  if (!selected || selected.moveLeft <= 0) return;
+
+  getMoveTargets(selected).forEach(({ col, row }) => {
+    const { x, y } = hexCenter(col, row);
+    const polygon = createSvgElement('polygon', {
+      points: hexPoints(x, y, HEX_SIZE * 0.78),
+      fill: '#fff2c7',
+      stroke: '#5f491d',
+      'stroke-width': 1.5,
+      class: 'move-target'
+    });
+    polygon.addEventListener('click', (event) => {
+      event.stopPropagation();
+      moveSelectedUnit(col, row);
+    });
+    board.appendChild(polygon);
+  });
 }
 
 function drawTokens() {
@@ -344,42 +418,173 @@ function drawStartMarkers() {
 }
 
 function drawUnits() {
-  state.units.forEach((unit, index) => {
-    const { x, y } = hexCenter(unit.col, unit.row);
-    const offset = index === 0 ? -9 : 9;
-    const circle = createSvgElement('circle', {
-      cx: x + offset,
-      cy: y + 15,
-      r: 9,
-      fill: unit.type === 'osadnik' ? '#f4e4a4' : '#d88a6a',
-      stroke: '#4a2f16',
-      'stroke-width': 1.5,
-      class: 'unit'
-    });
-    board.appendChild(circle);
+  const groups = new Map();
+  state.units.forEach((unit) => {
+    const k = key(unit.col, unit.row);
+    if (!groups.has(k)) groups.set(k, []);
+    groups.get(k).push(unit);
+  });
 
-    const text = createSvgElement('text', {
-      x: x + offset,
-      y: y + 16,
-      fill: '#2a2110',
-      'font-size': unit.type === 'osadnik' ? 9 : 7,
-      class: 'unit-text'
+  groups.forEach((unitsOnHex) => {
+    unitsOnHex.forEach((unit, index) => {
+      const { x, y } = hexCenter(unit.col, unit.row);
+      const offset = unitsOnHex.length === 1 ? 0 : index === 0 ? -10 : 10;
+      const cx = x + offset;
+      const cy = y + 15;
+      const isSelected = unit.id === state.selectedUnitId;
+
+      if (isSelected) {
+        const ring = createSvgElement('circle', {
+          cx,
+          cy,
+          r: 12.5,
+          class: 'selected-unit-ring'
+        });
+        board.appendChild(ring);
+      }
+
+      const circle = createSvgElement('circle', {
+        cx,
+        cy,
+        r: 9,
+        fill: unit.type === 'settler' ? '#f4e4a4' : '#d88a6a',
+        stroke: '#4a2f16',
+        'stroke-width': 1.5,
+        class: 'unit'
+      });
+      circle.addEventListener('click', (event) => {
+        event.stopPropagation();
+        selectUnit(unit.id);
+      });
+      board.appendChild(circle);
+
+      const text = createSvgElement('text', {
+        x: cx,
+        y: cy + 1,
+        fill: '#2a2110',
+        'font-size': unit.type === 'settler' ? 9 : 7,
+        class: 'unit-text'
+      });
+      text.textContent = unit.label;
+      board.appendChild(text);
     });
-    text.textContent = unit.label;
-    board.appendChild(text);
   });
 }
 
-function selectHex(col, row) {
+function handleHexClick(col, row) {
+  const selected = getSelectedUnit();
+  if (selected && canMoveTo(selected, col, row)) {
+    moveSelectedUnit(col, row);
+    return;
+  }
+  selectHex(col, row);
+}
+
+function selectUnit(unitId) {
+  state.selectedUnitId = unitId;
+  const unit = getSelectedUnit();
+  if (unit) {
+    addLog(`Wybrano jednostkę: ${unit.name}.`);
+    selectHex(unit.col, unit.row, false);
+  }
+  render();
+}
+
+function getSelectedUnit() {
+  return state.units.find((unit) => unit.id === state.selectedUnitId) || null;
+}
+
+function getUnitsAt(col, row) {
+  return state.units.filter((unit) => unit.col === col && unit.row === row);
+}
+
+function getMoveTargets(unit) {
+  return neighbors(unit.col, unit.row)
+    .map(([col, row]) => ({ col, row }))
+    .filter((pos) => canMoveTo(unit, pos.col, pos.row));
+}
+
+function canMoveTo(unit, col, row) {
+  if (unit.moveLeft <= 0) return false;
+  if (hexDistance({ col: unit.col, row: unit.row }, { col, row }) !== 1) return false;
+
+  const terrain = state.terrain.get(key(col, row));
+  if (!passableTerrain.includes(terrain)) return false;
+
+  const otherUnits = getUnitsAt(col, row).filter((other) => other.id !== unit.id);
+  if (otherUnits.length > 0) return false;
+
+  return true;
+}
+
+function moveSelectedUnit(col, row) {
+  const unit = getSelectedUnit();
+  if (!unit || !canMoveTo(unit, col, row)) return;
+
+  const from = `${unit.col}, ${unit.row}`;
+  unit.col = col;
+  unit.row = row;
+  unit.moveLeft -= 1;
+
+  addLog(`${unit.name} rusza się z ${from} na ${col}, ${row}. Pozostały ruch: ${unit.moveLeft}.`);
+  revealTokenIfPresent(col, row, unit);
+  selectHex(col, row, false);
+  render();
+}
+
+function revealTokenIfPresent(col, row, unit) {
+  const k = key(col, row);
+  const token = state.tokens.get(k);
+  if (!token || state.revealed.has(k)) return;
+
+  state.revealed.set(k, token.content);
+  state.discoveries += 1;
+  discoveriesValue.textContent = String(state.discoveries);
+  addLog(`${unit.name} odkrywa żeton: ${token.content}.`);
+}
+
+function endTurn() {
+  state.round += 1;
+  state.units.forEach((unit) => {
+    unit.moveLeft = unit.maxMove;
+  });
+  roundValue.textContent = String(state.round);
+  addLog(`Koniec tury. Runda ${state.round}. Ruch jednostek odświeżony.`);
+  render();
+}
+
+function renderSelectedUnitPanel() {
+  const unit = getSelectedUnit();
+  if (!unit) {
+    selectedUnitBox.textContent = 'Kliknij osadnika albo wojownika.';
+    return;
+  }
+
+  selectedUnitBox.innerHTML = `
+    <div class="unit-card-title">
+      <strong>${unit.name}</strong>
+      <span>${unit.col}, ${unit.row}</span>
+    </div>
+    <div>${unit.description}</div>
+    <div class="unit-stat-grid">
+      <div class="unit-stat"><span>HP</span><b>${unit.hp} / ${unit.maxHp}</b></div>
+      <div class="unit-stat"><span>Ruch</span><b>${unit.moveLeft} / ${unit.maxMove}</b></div>
+      <div class="unit-stat"><span>Atak</span><b>${unit.attack}</b></div>
+      <div class="unit-stat"><span>Obrona</span><b>${unit.defense}</b></div>
+    </div>
+  `;
+}
+
+function selectHex(col, row, reveal = true) {
   const k = key(col, row);
   const type = state.terrain.get(k);
   const token = state.tokens.get(k);
-  const units = state.units.filter((unit) => unit.col === col && unit.row === row);
+  const units = getUnitsAt(col, row);
 
   let html = `<strong>Heks:</strong> ${col}, ${row}<br>`;
   html += `<strong>Teren:</strong> ${terrainNames[type]}<br>`;
 
-  if (token && !state.revealed.has(k)) {
+  if (token && !state.revealed.has(k) && reveal) {
     state.revealed.set(k, token.content);
     state.discoveries += 1;
     discoveriesValue.textContent = String(state.discoveries);
@@ -388,12 +593,14 @@ function selectHex(col, row) {
     render();
   } else if (token && state.revealed.has(k)) {
     html += `<strong>Żeton odkrycia:</strong> ${state.revealed.get(k)}<br>`;
+  } else if (token) {
+    html += '<strong>Żeton odkrycia:</strong> zakryty<br>';
   } else {
     html += '<strong>Żeton odkrycia:</strong> brak<br>';
   }
 
   if (units.length > 0) {
-    html += `<strong>Jednostki:</strong> ${units.map((unit) => unit.type).join(', ')}<br>`;
+    html += `<strong>Jednostki:</strong> ${units.map((unit) => unit.name).join(', ')}<br>`;
   }
 
   selectedHex.innerHTML = html;
@@ -407,6 +614,7 @@ function addLog(message) {
 }
 
 document.querySelector('#new-map-button').addEventListener('click', startNewMap);
+document.querySelector('#end-turn-button').addEventListener('click', endTurn);
 document.querySelector('#toggle-tokens-button').addEventListener('click', () => {
   state.showTokens = !state.showTokens;
   render();
