@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Epoki Imperiów — prototyp gry</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div>
+      <h1>Epoki Imperiów</h1>
+      <p>Prototyp gry w przeglądarce — mapa, start, jednostki i żetony odkryć.</p>
+    </div>
+    <div class="topbar-actions">
+      <button id="new-map-button">Nowa mapa</button>
+      <button id="toggle-tokens-button">Pokaż / ukryj żetony</button>
+    </div>
+  </header>
+
+  <main class="layout">
+    <aside class="panel">
+      <h2>Aktualny moduł</h2>
+      <div class="module-box">
+        <strong>Mapa + start gry</strong>
+        <p>Na razie kodujemy tylko zatwierdzony koncept: kontynent, start gracza, osadnik, wojownik i żetony odkryć poza strefą startową.</p>
+      </div>
+
+      <h2>Stan gry</h2>
+      <dl class="stats">
+        <div><dt>Runda</dt><dd id="round-value">1</dd></div>
+        <div><dt>Gracz</dt><dd id="player-value">Gracz 1</dd></div>
+        <div><dt>Start</dt><dd id="start-value">—</dd></div>
+        <div><dt>Odkryto</dt><dd id="discoveries-value">0</dd></div>
+      </dl>
+
+      <h2>Wybrane pole</h2>
+      <div id="selected-hex" class="info-box">Kliknij heks na mapie.</div>
+
+      <h2>Dziennik</h2>
+      <div id="log" class="log"></div>
+    </aside>
+
+    <section class="board-wrap">
+      <svg id="board" role="img" aria-label="Mapa heksowa gry Epoki Imperiów"></svg>
+    </section>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
