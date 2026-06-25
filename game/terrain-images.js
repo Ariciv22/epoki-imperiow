@@ -1,17 +1,19 @@
 (() => {
-  const IMAGE_DIRS = ['../grafiki', 'grafiki'];
+  const IMAGE_DIRS = ['../Grafiki', '../grafiki', 'Grafiki', 'grafiki'];
   const IMAGE_EXTENSIONS = ['png', 'webp', 'jpg', 'jpeg', 'svg', 'PNG', 'WEBP', 'JPG', 'JPEG', 'SVG'];
 
   const TERRAIN_IMAGE_NAMES = {
-    ocean: ['ocean', 'Ocean', 'woda', 'Woda', 'morze', 'Morze', 'wybrzeze', 'wybrzeże'],
-    coast: ['wybrzeze', 'wybrzeże', 'Wybrzeze', 'Wybrzeże', 'coast', 'Coast'],
-    plains: ['rowniny', 'równiny', 'Rowniny', 'Równiny', 'plains', 'Plains'],
-    forest: ['las', 'Las', 'forest', 'Forest'],
-    hills: ['wzgorza', 'wzgórza', 'Wzgorza', 'Wzgórza', 'hills', 'Hills'],
-    mountain: ['gory', 'góry', 'Gory', 'Góry', 'mountain', 'Mountain', 'mountains', 'Mountains'],
-    desert: ['pustynia', 'Pustynia', 'desert', 'Desert'],
-    lake: ['jezioro', 'Jezioro', 'lake', 'Lake', 'woda', 'Woda'],
-    natural: ['cud-naturalny', 'cud_naturalny', 'cud naturalny', 'Cud naturalny', 'natural', 'Natural']
+    ocean: ['wybrzeze', 'wybrzeże', 'Wybrzeze', 'Wybrzeże'],
+    coast: ['wybrzeze', 'wybrzeże', 'Wybrzeze', 'Wybrzeże'],
+    plains: ['rowniny', 'równiny', 'Rowniny', 'Równiny'],
+    forest: ['las', 'Las'],
+    hills: ['wzgorza', 'wzgórza', 'Wzgorza', 'Wzgórza'],
+    mountain: ['gory', 'góry', 'Gory', 'Góry'],
+    desert: ['pustynia', 'Pustynia'],
+    lake: ['obszar_zalewowy', 'obszar-zalewowy', 'obszar zalewowy', 'Obszar_zalewowy', 'Obszar zalewowy'],
+    floodplain: ['obszar_zalewowy', 'obszar-zalewowy', 'obszar zalewowy', 'Obszar_zalewowy', 'Obszar zalewowy'],
+    tundra: ['tundra', 'Tundra'],
+    natural: ['gory', 'góry', 'Gory', 'Góry']
   };
 
   const terrainImageCache = new Map();
@@ -89,10 +91,12 @@
 
     const border = createSvgElement('polygon', {
       points,
-      fill: 'none',
+      fill: 'transparent',
       stroke: type === 'ocean' || type === 'coast' ? '#1f5975' : '#26323a',
       'stroke-width': '1.2',
-      class: 'hex-border'
+      class: 'hex-border',
+      'data-col': col,
+      'data-row': row
     });
     border.addEventListener('click', () => handleHexClick(col, row));
     board.appendChild(border);
@@ -104,22 +108,21 @@
     const points = hexPoints(x, y, HEX_SIZE * 0.96);
     const imageSrc = getTerrainImage(type);
 
-    const polygon = createSvgElement('polygon', {
-      points,
-      fill: terrainPatterns[type] || terrainColors[type],
-      stroke: type === 'ocean' || type === 'coast' ? '#1f5975' : '#26323a',
-      'stroke-width': '1.2',
-      class: 'hex',
-      'data-col': col,
-      'data-row': row
-    });
-
-    polygon.addEventListener('click', () => handleHexClick(col, row));
-    board.appendChild(polygon);
-
     if (imageSrc) {
       drawTerrainImage(col, row, type, x, y, points, imageSrc);
     } else {
+      const polygon = createSvgElement('polygon', {
+        points,
+        fill: terrainPatterns[type] || terrainColors[type],
+        stroke: type === 'ocean' || type === 'coast' ? '#1f5975' : '#26323a',
+        'stroke-width': '1.2',
+        class: 'hex',
+        'data-col': col,
+        'data-row': row
+      });
+
+      polygon.addEventListener('click', () => handleHexClick(col, row));
+      board.appendChild(polygon);
       drawTerrainDecoration(col, row, type, x, y);
     }
 
