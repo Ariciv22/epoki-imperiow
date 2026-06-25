@@ -16,6 +16,18 @@ const terrainColors = {
   natural: '#c58edb'
 };
 
+const terrainPatterns = {
+  ocean: 'url(#terrain-ocean)',
+  coast: 'url(#terrain-coast)',
+  plains: 'url(#terrain-plains)',
+  forest: 'url(#terrain-forest)',
+  hills: 'url(#terrain-hills)',
+  mountain: 'url(#terrain-mountain)',
+  desert: 'url(#terrain-desert)',
+  lake: 'url(#terrain-lake)',
+  natural: 'url(#terrain-natural)'
+};
+
 const terrainLabels = {
   ocean: 'O',
   coast: 'W',
@@ -82,7 +94,8 @@ let state = {
   units: [],
   selectedUnitId: null,
   discoveries: 0,
-  showTokens: true
+  showTokens: true,
+  showTerrainLabels: false
 };
 
 const board = document.querySelector('#board');
@@ -301,6 +314,7 @@ function render() {
   board.setAttribute('width', width);
   board.setAttribute('height', height);
   board.innerHTML = '';
+  addTerrainDefs();
 
   for (let row = 0; row < ROWS; row += 1) {
     for (let col = 0; col < COLS; col += 1) {
@@ -315,12 +329,74 @@ function render() {
   renderSelectedUnitPanel();
 }
 
+function addTerrainDefs() {
+  const defs = createSvgElement('defs');
+  defs.innerHTML = `
+    <pattern id="terrain-plains" width="54" height="54" patternUnits="userSpaceOnUse">
+      <rect width="54" height="54" fill="#8fbd68"/>
+      <path d="M5 18 C14 10 22 24 31 14 C40 5 45 18 52 12" fill="none" stroke="#6fa34f" stroke-width="2" opacity="0.55"/>
+      <path d="M8 38 C18 31 29 45 41 34" fill="none" stroke="#b7d986" stroke-width="1.5" opacity="0.45"/>
+      <circle cx="13" cy="11" r="1.4" fill="#d7eaa7" opacity="0.55"/>
+      <circle cx="39" cy="42" r="1.3" fill="#d7eaa7" opacity="0.45"/>
+    </pattern>
+    <pattern id="terrain-forest" width="58" height="58" patternUnits="userSpaceOnUse">
+      <rect width="58" height="58" fill="#3f7f4f"/>
+      <path d="M14 36 L22 18 L30 36 Z" fill="#235f37" opacity="0.9"/>
+      <path d="M32 40 L42 16 L52 40 Z" fill="#2d6e42" opacity="0.9"/>
+      <path d="M0 42 L9 22 L18 42 Z" fill="#2b693f" opacity="0.85"/>
+      <rect x="21" y="34" width="3" height="8" fill="#6f4d27" opacity="0.7"/>
+      <rect x="41" y="38" width="3" height="8" fill="#6f4d27" opacity="0.7"/>
+    </pattern>
+    <pattern id="terrain-hills" width="60" height="60" patternUnits="userSpaceOnUse">
+      <rect width="60" height="60" fill="#a58b55"/>
+      <ellipse cx="18" cy="33" rx="18" ry="10" fill="#8e7444" opacity="0.65"/>
+      <ellipse cx="43" cy="24" rx="20" ry="12" fill="#b89d64" opacity="0.65"/>
+      <path d="M4 43 C20 35 36 50 56 38" fill="none" stroke="#705b37" stroke-width="2" opacity="0.35"/>
+    </pattern>
+    <pattern id="terrain-mountain" width="60" height="60" patternUnits="userSpaceOnUse">
+      <rect width="60" height="60" fill="#8a8a86"/>
+      <polygon points="6,48 23,13 40,48" fill="#646461"/>
+      <polygon points="25,49 43,8 58,49" fill="#73736f"/>
+      <path d="M23 13 L28 27 L18 27 Z" fill="#f1f1e5" opacity="0.85"/>
+      <path d="M43 8 L48 25 L37 25 Z" fill="#f1f1e5" opacity="0.8"/>
+    </pattern>
+    <pattern id="terrain-desert" width="60" height="60" patternUnits="userSpaceOnUse">
+      <rect width="60" height="60" fill="#d8bc72"/>
+      <path d="M0 23 C14 14 28 31 42 21 C51 15 56 17 60 19" fill="none" stroke="#b9964b" stroke-width="2" opacity="0.55"/>
+      <path d="M0 44 C15 36 27 49 42 41 C51 36 56 38 60 40" fill="none" stroke="#edd58e" stroke-width="1.5" opacity="0.55"/>
+      <circle cx="17" cy="16" r="1.3" fill="#9b793b" opacity="0.4"/>
+      <circle cx="45" cy="47" r="1.2" fill="#9b793b" opacity="0.35"/>
+    </pattern>
+    <pattern id="terrain-ocean" width="62" height="62" patternUnits="userSpaceOnUse">
+      <rect width="62" height="62" fill="#2f6f9f"/>
+      <path d="M0 18 C10 10 20 26 31 18 C42 10 51 25 62 16" fill="none" stroke="#7cc7df" stroke-width="2" opacity="0.45"/>
+      <path d="M0 41 C12 34 22 49 34 41 C45 34 52 47 62 39" fill="none" stroke="#1f5975" stroke-width="2" opacity="0.5"/>
+    </pattern>
+    <pattern id="terrain-coast" width="62" height="62" patternUnits="userSpaceOnUse">
+      <rect width="62" height="62" fill="#5aa7c8"/>
+      <path d="M-4 42 C12 22 26 51 42 30 C51 18 59 24 66 20" fill="none" stroke="#e7d18e" stroke-width="5" opacity="0.55"/>
+      <path d="M0 18 C10 12 20 26 31 18 C42 11 51 25 62 17" fill="none" stroke="#a7e0ef" stroke-width="1.8" opacity="0.5"/>
+    </pattern>
+    <pattern id="terrain-lake" width="62" height="62" patternUnits="userSpaceOnUse">
+      <rect width="62" height="62" fill="#4f9bc2"/>
+      <ellipse cx="31" cy="31" rx="24" ry="16" fill="#69b7d4" opacity="0.7"/>
+      <path d="M10 31 C19 25 28 37 37 31 C45 26 52 33 57 28" fill="none" stroke="#d4f4fb" stroke-width="1.8" opacity="0.55"/>
+    </pattern>
+    <pattern id="terrain-natural" width="62" height="62" patternUnits="userSpaceOnUse">
+      <rect width="62" height="62" fill="#8fbd68"/>
+      <circle cx="31" cy="31" r="22" fill="#c58edb" opacity="0.65"/>
+      <path d="M31 9 L38 27 L57 27 L42 39 L48 57 L31 45 L14 57 L20 39 L5 27 L24 27 Z" fill="#f4e7a2" opacity="0.9"/>
+    </pattern>
+  `;
+  board.appendChild(defs);
+}
+
 function drawHex(col, row) {
   const type = state.terrain.get(key(col, row));
   const { x, y } = hexCenter(col, row);
   const polygon = createSvgElement('polygon', {
     points: hexPoints(x, y, HEX_SIZE * 0.96),
-    fill: terrainColors[type],
+    fill: terrainPatterns[type] || terrainColors[type],
     stroke: type === 'ocean' || type === 'coast' ? '#1f5975' : '#26323a',
     'stroke-width': '1.2',
     class: 'hex',
@@ -330,15 +406,100 @@ function drawHex(col, row) {
 
   polygon.addEventListener('click', () => handleHexClick(col, row));
   board.appendChild(polygon);
+  drawTerrainDecoration(col, row, type, x, y);
 
-  const label = createSvgElement('text', {
-    x,
-    y: y + 1,
-    fill: ['ocean', 'coast', 'forest', 'mountain', 'natural'].includes(type) ? '#ffffff' : '#1f2723',
-    class: 'hex-label'
-  });
-  label.textContent = terrainLabels[type];
-  board.appendChild(label);
+  if (state.showTerrainLabels) {
+    const label = createSvgElement('text', {
+      x,
+      y: y + 1,
+      fill: ['ocean', 'coast', 'forest', 'mountain', 'natural'].includes(type) ? '#ffffff' : '#1f2723',
+      class: 'hex-label'
+    });
+    label.textContent = terrainLabels[type];
+    board.appendChild(label);
+  }
+}
+
+function drawTerrainDecoration(col, row, type, x, y) {
+  const seed = (col * 31 + row * 17 + state.seed) % 100;
+  const group = createSvgElement('g', { class: 'terrain-decoration' });
+
+  if (type === 'forest') {
+    const trees = [[-8, 0], [3, -7], [10, 3]];
+    trees.forEach(([dx, dy], index) => {
+      const tree = createSvgElement('path', {
+        d: `M ${x + dx - 6} ${y + dy + 6} L ${x + dx} ${y + dy - 8 - index} L ${x + dx + 6} ${y + dy + 6} Z`,
+        fill: index === 1 ? '#174d2e' : '#215f38',
+        opacity: 0.9
+      });
+      group.appendChild(tree);
+    });
+  }
+
+  if (type === 'mountain') {
+    [[-8, 7, 18], [7, 8, 22]].forEach(([dx, base, height]) => {
+      const mountain = createSvgElement('polygon', {
+        points: `${x + dx - 10},${y + base} ${x + dx},${y + base - height} ${x + dx + 10},${y + base}`,
+        fill: '#5d5d5a',
+        opacity: 0.88
+      });
+      group.appendChild(mountain);
+      const snow = createSvgElement('polygon', {
+        points: `${x + dx - 4},${y + base - height + 8} ${x + dx},${y + base - height} ${x + dx + 5},${y + base - height + 9}`,
+        fill: '#f2f0df',
+        opacity: 0.9
+      });
+      group.appendChild(snow);
+    });
+  }
+
+  if (type === 'hills') {
+    const hill = createSvgElement('path', {
+      d: `M ${x - 16} ${y + 7} C ${x - 8} ${y - 4}, ${x + 2} ${y - 6}, ${x + 17} ${y + 7} Z`,
+      fill: '#7f6539',
+      opacity: 0.55
+    });
+    group.appendChild(hill);
+  }
+
+  if (type === 'plains' && seed > 55) {
+    const grass = createSvgElement('path', {
+      d: `M ${x - 14} ${y + 7} C ${x - 4} ${y + 1}, ${x + 6} ${y + 12}, ${x + 15} ${y + 4}`,
+      fill: 'none',
+      stroke: '#e0eaa2',
+      'stroke-width': 1.7,
+      opacity: 0.55
+    });
+    group.appendChild(grass);
+  }
+
+  if (type === 'desert') {
+    const dune = createSvgElement('path', {
+      d: `M ${x - 17} ${y + 6} C ${x - 5} ${y - 3}, ${x + 7} ${y + 12}, ${x + 18} ${y + 1}`,
+      fill: 'none',
+      stroke: '#f1dc96',
+      'stroke-width': 2,
+      opacity: 0.65
+    });
+    group.appendChild(dune);
+  }
+
+  if (type === 'natural') {
+    const star = createSvgElement('text', {
+      x,
+      y: y + 3,
+      fill: '#4b2a68',
+      'font-size': 16,
+      'font-weight': 900,
+      'text-anchor': 'middle',
+      'dominant-baseline': 'middle',
+      opacity: 0.9
+    });
+    star.textContent = '✦';
+    group.appendChild(star);
+  }
+
+  board.appendChild(group);
 }
 
 function drawMoveTargets() {
