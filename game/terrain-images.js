@@ -1,62 +1,42 @@
 (() => {
-  const IMAGE_DIRS = ['../Grafiki', '../grafiki', 'Grafiki', 'grafiki'];
-  const IMAGE_EXTENSIONS = ['png', 'webp', 'jpg', 'jpeg', 'svg', 'PNG', 'WEBP', 'JPG', 'JPEG', 'SVG'];
-
-  const TERRAIN_IMAGE_NAMES = {
-    ocean: ['wybrzeze', 'wybrzeże', 'Wybrzeze', 'Wybrzeże'],
-    coast: ['wybrzeze', 'wybrzeże', 'Wybrzeze', 'Wybrzeże'],
-    plains: ['rowniny', 'równiny', 'Rowniny', 'Równiny'],
-    forest: ['las', 'Las'],
-    hills: ['wzgorza', 'wzgórza', 'Wzgorza', 'Wzgórza'],
-    mountain: ['gory', 'góry', 'Gory', 'Góry'],
-    desert: ['pustynia', 'Pustynia'],
-    lake: ['obszar_zalewowy', 'obszar-zalewowy', 'obszar zalewowy', 'Obszar_zalewowy', 'Obszar zalewowy'],
-    floodplain: ['obszar_zalewowy', 'obszar-zalewowy', 'obszar zalewowy', 'Obszar_zalewowy', 'Obszar zalewowy'],
-    tundra: ['tundra', 'Tundra'],
-    natural: ['gory', 'góry', 'Gory', 'Góry']
+  const TERRAIN_IMAGES = {
+    ocean: '../grafiki/wybrzeze.png',
+    coast: '../grafiki/wybrzeze.png',
+    plains: '../grafiki/rowniny.png',
+    forest: '../grafiki/las.png',
+    hills: '../grafiki/wzgorza.png',
+    mountain: '../grafiki/gory.png',
+    desert: '../grafiki/pustynia.png',
+    lake: '../grafiki/obszar_zalewowy.png',
+    floodplain: '../grafiki/obszar_zalewowy.png',
+    tundra: '../grafiki/tundra.png',
+    natural: '../grafiki/gory.png'
   };
 
   const terrainImageCache = new Map();
-
-  function unique(values) {
-    return [...new Set(values)];
-  }
-
-  function buildImageCandidates(type) {
-    const names = TERRAIN_IMAGE_NAMES[type] || [type];
-    return unique(
-      IMAGE_DIRS.flatMap((directory) =>
-        names.flatMap((name) =>
-          IMAGE_EXTENSIONS.map((extension) => `${directory}/${name}.${extension}`)
-        )
-      )
-    );
-  }
 
   function loadTerrainImage(type) {
     const cached = terrainImageCache.get(type);
     if (cached && cached.status !== 'missing') return;
 
-    const candidates = buildImageCandidates(type);
-    terrainImageCache.set(type, { status: 'loading', src: null });
-
-    function tryNext(index) {
-      if (index >= candidates.length) {
-        terrainImageCache.set(type, { status: 'missing', src: null });
-        return;
-      }
-
-      const src = candidates[index];
-      const probe = new Image();
-      probe.onload = () => {
-        terrainImageCache.set(type, { status: 'loaded', src });
-        render();
-      };
-      probe.onerror = () => tryNext(index + 1);
-      probe.src = src;
+    const src = TERRAIN_IMAGES[type];
+    if (!src) {
+      terrainImageCache.set(type, { status: 'missing', src: null });
+      return;
     }
 
-    tryNext(0);
+    terrainImageCache.set(type, { status: 'loading', src: null });
+
+    const probe = new Image();
+    probe.onload = () => {
+      terrainImageCache.set(type, { status: 'loaded', src });
+      render();
+    };
+    probe.onerror = () => {
+      console.warn(`Nie znaleziono grafiki terenu: ${src}`);
+      terrainImageCache.set(type, { status: 'missing', src: null });
+    };
+    probe.src = src;
   }
 
   function getTerrainImage(type) {
