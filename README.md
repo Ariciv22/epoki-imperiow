@@ -21,10 +21,10 @@ Pierwsze moduły projektu:
 - [08 — Szkielet mapy kontynentalnej](docs/08-szkielet-mapy-kontynentalnej.md)
 - [09 — Reguły generowania szkieletu mapy](docs/09-reguly-generowania-szkieletu-mapy.md)
 - [10 — Układ 40 kafli mapy](docs/10-uklad-40-kafli-mapy.md)
-- [11 — Rdzeń rozgrywki](docs/11-rdzen-rozgrywki.md)
 
 ## Prototypy
 
+- [Prototyp gry w przeglądarce](game/README.md)
 - [Generator szkieletu mapy](prototypes/map-generator/README.md)
 
 ## Referencje wizualne
