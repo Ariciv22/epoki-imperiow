@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Epoki Imperiow — prosty generator szkieletu mapy.
+Epoki Imperiow - prosty generator szkieletu mapy.
 
 Generator tworzy koncepcyjne mapy SVG:
 - 20 x 14 heksow = 280 pol,
@@ -10,7 +10,8 @@ Generator tworzy koncepcyjne mapy SVG:
 - woda przybrzezna przy ladzie,
 - pasma gor, lasy, jeziora, suchy region i cuda naturalne,
 - starty graczy na ladzie,
-- brak zetonow odkryc w promieniu 2 heksow od startu.
+- brak zetonow odkryc w promieniu 2 heksow od startu,
+- opcjonalny podglad 40 kafli po 7 heksow przez --show-tiles.
 
 To jest prototyp wizualny, nie finalny silnik gry.
 """
@@ -27,12 +28,17 @@ from typing import Dict, Iterable, List, Tuple
 
 Coord = Tuple[int, int]
 TerrainMap = Dict[Coord, str]
+TileMap = Dict[Coord, str]
 
 COLS = 20
 ROWS = 14
 HEX_SIZE = 22
 MARGIN_X = 34
 MARGIN_Y = 48
+
+TILE_COLS = 8
+TILE_ROWS = 5
+TILE_CAPACITY = 7
 
 TERRAIN_COLORS = {
     "ocean": "#2f6f9f",
@@ -60,6 +66,8 @@ TERRAIN_LABELS = {
 
 LAND_FOR_START = {"plains", "forest", "hills", "desert"}
 LAND_FOR_DISCOVERY = {"plains", "forest", "hills", "desert"}
+LAND_TERRAINS = {"plains", "forest", "hills", "mountain", "desert", "lake", "natural"}
+WATER_TERRAINS = {"ocean", "coast"}
 
 
 @dataclass(frozen=True)
@@ -67,6 +75,7 @@ class MapResult:
     terrain: TerrainMap
     starts: List[Coord]
     discovery_tokens: List[Coord]
+    tile_assignments: TileMap
     seed: int
     variant: int
     land_scale: float
@@ -83,6 +92,20 @@ def neighbors(col: int, row: int) -> Iterable[Coord]:
         nc, nr = col + dc, row + dr
         if 0 <= nc < COLS and 0 <= nr < ROWS:
             yield nc, nr
+
+
+def edge_neighbor(col: int, row: int, edge_index: int) -> Coord:
+    """Zwraca sasiada po danej krawedzi heksa.
+
+    Kolejnosc krawedzi odpowiada punktom heksa w renderingu flat-top:
+    0=NE, 1=N, 2=NW, 3=SW, 4=S, 5=SE.
+    """
+    if col % 2 == 0:
+        dirs = [(1, -1), (0, -1), (-1, -1), (-1, 0), (0, 1), (1, 0)]
+    else:
+        dirs = [(1, 0), (0, -1), (-1, 0), (-1, 1), (0, 1), (1, 1)]
+    dc, dr = dirs[edge_index]
+    return col + dc, row + dr
 
 
 def oddq_to_cube(col: int, row: int) -> Tuple[int, int, int]:
@@ -103,19 +126,12 @@ def nearest_position(candidates: List[Coord], target: Coord) -> Coord:
 
 
 def build_base_continent(rng: random.Random, variant: int, land_scale: float) -> TerrainMap:
-    """Tworzy ocean i nieregularny glowny lad.
-
-    land_scale steruje iloscia ladu:
-    - 1.00 daje bardziej morska wersje,
-    - 1.14 jest aktualnym standardem z wiekszym kontynentem,
-    - 1.22 daje bardzo duzo ladu.
-    """
+    """Tworzy ocean i nieregularny glowny lad."""
     terrain: TerrainMap = {}
 
     center_x = (COLS - 1) / 2 + rng.uniform(-0.45, 0.45)
     center_y = (ROWS - 1) / 2 + rng.uniform(-0.30, 0.30)
 
-    # Wersja 0.2: wiekszy kontynent, mniej pustego oceanu.
     radius_x = rng.uniform(0.80, 0.98) * land_scale
     radius_y = rng.uniform(0.68, 0.82) * land_scale
     radius_x = min(radius_x, 1.13)
@@ -144,8 +160,6 @@ def build_base_continent(rng: random.Random, variant: int, land_scale: float) ->
             value = (xr / radius_x) ** 2 + (yr / radius_y) ** 2 + edge_noise
             is_land = value < 1.0
 
-            # Mniejsze zatoki niz w wersji 0.1: kontynent nadal jest nieregularny,
-            # ale nie traci tak duzo heksow ladu.
             bays = []
             if preset in (0, 3, 5, 8):
                 bays.append(col < 3 and 4 <= row <= 7)
@@ -163,7 +177,6 @@ def build_base_continent(rng: random.Random, variant: int, land_scale: float) ->
             if any(bays):
                 is_land = False
 
-            # Rogi zostaja bardziej oceaniczne, zeby mapa nie wygladala jak prostokat.
             if (col < 2 and row < 2) or (col > COLS - 3 and row < 2):
                 is_land = False
             if (col < 2 and row > ROWS - 3) or (col > COLS - 3 and row > ROWS - 3):
@@ -171,7 +184,6 @@ def build_base_continent(rng: random.Random, variant: int, land_scale: float) ->
 
             terrain[(col, row)] = "plains" if is_land else "ocean"
 
-    # Male wyspy / polwyspy jako urozmaicenie, ale nie glowna czesc mapy.
     island_candidates = {
         0: [(3, 10), (16, 3), (17, 4), (2, 7)],
         1: [(3, 10), (4, 11), (16, 3), (17, 8)],
@@ -331,23 +343,6 @@ def place_discovery_tokens(terrain: TerrainMap, starts: List[Coord], seed: int) 
     return tokens
 
 
-def generate_map(seed: int, variant: int, players: int, land_scale: float) -> MapResult:
-    rng = random.Random(seed)
-    terrain = build_base_continent(rng, variant, land_scale)
-    mark_coasts(terrain)
-    add_feature_regions(terrain, rng, variant)
-    starts = choose_starts(terrain, players)
-    discovery_tokens = place_discovery_tokens(terrain, starts, seed)
-    return MapResult(
-        terrain=terrain,
-        starts=starts,
-        discovery_tokens=discovery_tokens,
-        seed=seed,
-        variant=variant,
-        land_scale=land_scale,
-    )
-
-
 def hex_center(col: int, row: int) -> Tuple[float, float]:
     hex_h = math.sqrt(3) * HEX_SIZE
     x_step = 1.5 * HEX_SIZE
@@ -358,12 +353,115 @@ def hex_center(col: int, row: int) -> Tuple[float, float]:
     return cx, cy
 
 
-def hex_points(cx: float, cy: float, size: float) -> str:
+def tile_id(tile_col: int, tile_row: int) -> str:
+    return f"{chr(ord('A') + tile_row)}{tile_col + 1}"
+
+
+def build_tile_assignments() -> TileMap:
+    """Dzieli aktualna siatke 280 heksow na 40 roboczych kafli po 7 heksow.
+
+    To jest warstwa prototypowa. Sluzy do sprawdzania granic kafli na obecnej
+    siatce 20 x 14. Kazdy kafel dostaje dokladnie 7 pol.
+    """
+    positions = [(col, row) for row in range(ROWS) for col in range(COLS)]
+    tile_centers: List[Tuple[str, float, float]] = []
+
+    for tile_row in range(TILE_ROWS):
+        for tile_col in range(TILE_COLS):
+            target_col = (tile_col + 0.5) * COLS / TILE_COLS - 0.5
+            target_row = (tile_row + 0.5) * ROWS / TILE_ROWS - 0.5
+            if tile_row % 2 == 1:
+                target_col += 0.25
+            cx, cy = hex_center(int(round(target_col)), int(round(target_row)))
+            tile_centers.append((tile_id(tile_col, tile_row), cx, cy))
+
+    pairs: List[Tuple[float, str, Coord]] = []
+    for pos in positions:
+        px, py = hex_center(*pos)
+        for tid, tx, ty in tile_centers:
+            dist = math.hypot(px - tx, py - ty)
+            pairs.append((dist, tid, pos))
+
+    pairs.sort(key=lambda item: item[0])
+    counts = {tid: 0 for tid, _, _ in tile_centers}
+    assignment: TileMap = {}
+
+    for _, tid, pos in pairs:
+        if pos in assignment:
+            continue
+        if counts[tid] >= TILE_CAPACITY:
+            continue
+        assignment[pos] = tid
+        counts[tid] += 1
+        if len(assignment) == len(positions):
+            break
+
+    # Awaryjne dopelnienie, gdyby jakies pole nie zostalo przypisane.
+    for pos in positions:
+        if pos in assignment:
+            continue
+        tid = min(counts, key=counts.get)
+        assignment[pos] = tid
+        counts[tid] += 1
+
+    return assignment
+
+
+def tile_cells(tile_assignments: TileMap) -> Dict[str, List[Coord]]:
+    tiles: Dict[str, List[Coord]] = {}
+    for pos, tid in tile_assignments.items():
+        tiles.setdefault(tid, []).append(pos)
+    return tiles
+
+
+def classify_tile(tile_positions: List[Coord], terrain: TerrainMap, starts: List[Coord]) -> str:
+    values = [terrain[pos] for pos in tile_positions]
+    water = sum(1 for value in values if value in WATER_TERRAINS)
+    mountains_or_hills = sum(1 for value in values if value in {"mountain", "hills"})
+    forests = sum(1 for value in values if value == "forest")
+
+    if any(pos in starts for pos in tile_positions):
+        return "START"
+    if any(terrain[pos] == "natural" for pos in tile_positions):
+        return "SPEC"
+    if water >= 6:
+        return "OCEAN"
+    if water >= 3:
+        return "WYBRZ"
+    if mountains_or_hills + forests >= 4:
+        return "TRUD"
+    return "LAD"
+
+
+def generate_map(seed: int, variant: int, players: int, land_scale: float) -> MapResult:
+    rng = random.Random(seed)
+    terrain = build_base_continent(rng, variant, land_scale)
+    mark_coasts(terrain)
+    add_feature_regions(terrain, rng, variant)
+    starts = choose_starts(terrain, players)
+    discovery_tokens = place_discovery_tokens(terrain, starts, seed)
+    tile_assignments = build_tile_assignments()
+    return MapResult(
+        terrain=terrain,
+        starts=starts,
+        discovery_tokens=discovery_tokens,
+        tile_assignments=tile_assignments,
+        seed=seed,
+        variant=variant,
+        land_scale=land_scale,
+    )
+
+
+def hex_points_list(cx: float, cy: float, size: float) -> List[Tuple[float, float]]:
     points = []
     for i in range(6):
         angle = math.radians(60 * i)
         points.append((cx + size * math.cos(angle), cy + size * math.sin(angle)))
-    return " ".join(f"{x:.1f},{y:.1f}" for x, y in points)
+    return points
+
+
+def hex_points(cx: float, cy: float, size: float) -> str:
+    return " ".join(f"{x:.1f},{y:.1f}" for x, y in hex_points_list(cx, cy, size))
 
 
 def terrain_stats(terrain: TerrainMap) -> Dict[str, int]:
@@ -373,14 +471,50 @@ def terrain_stats(terrain: TerrainMap) -> Dict[str, int]:
     return stats
 
 
-def render_svg(result: MapResult, title: str) -> str:
+def render_tile_overlay(result: MapResult) -> List[str]:
+    parts: List[str] = []
+    parts.append('<g id="tile-boundaries" stroke="#fff2c7" stroke-width="3" stroke-linecap="round" opacity="0.95">')
+
+    for row in range(ROWS):
+        for col in range(COLS):
+            pos = (col, row)
+            current_tile = result.tile_assignments[pos]
+            cx, cy = hex_center(col, row)
+            pts = hex_points_list(cx, cy, HEX_SIZE * 0.98)
+
+            for edge_index in range(6):
+                n = edge_neighbor(col, row, edge_index)
+                neighbor_tile = result.tile_assignments.get(n)
+                if neighbor_tile == current_tile:
+                    continue
+                x1, y1 = pts[edge_index]
+                x2, y2 = pts[(edge_index + 1) % 6]
+                parts.append(f'<line x1="{x1:.1f}" y1="{y1:.1f}" x2="{x2:.1f}" y2="{y2:.1f}"/>')
+
+    parts.append('</g>')
+
+    tiles = tile_cells(result.tile_assignments)
+    parts.append('<g id="tile-labels" font-family="Arial, sans-serif" text-anchor="middle" font-weight="bold">')
+    for tid, cells in sorted(tiles.items()):
+        centers = [hex_center(*pos) for pos in cells]
+        avg_x = sum(x for x, _ in centers) / len(centers)
+        avg_y = sum(y for _, y in centers) / len(centers)
+        tile_type = classify_tile(cells, result.terrain, result.starts)
+        parts.append(f'<rect x="{avg_x-23:.1f}" y="{avg_y-16:.1f}" width="46" height="27" rx="6" fill="#111820" opacity="0.78"/>')
+        parts.append(f'<text x="{avg_x:.1f}" y="{avg_y-4:.1f}" font-size="11" fill="#fff2c7">{tid}</text>')
+        parts.append(f'<text x="{avg_x:.1f}" y="{avg_y+8:.1f}" font-size="8" fill="#d8e8f0">{tile_type}</text>')
+    parts.append('</g>')
+    return parts
+
+
+def render_svg(result: MapResult, title: str, show_tiles: bool) -> str:
     hex_h = math.sqrt(3) * HEX_SIZE
     x_step = 1.5 * HEX_SIZE
     width = int(MARGIN_X * 2 + (COLS - 1) * x_step + 2 * HEX_SIZE)
     board_height = int(MARGIN_Y * 2 + (ROWS - 1) * hex_h + hex_h + hex_h / 2)
-    height = board_height + 92
+    height = board_height + 100
     stats = terrain_stats(result.terrain)
-    land_count = sum(stats.get(t, 0) for t in ["plains", "forest", "hills", "mountain", "desert", "lake", "natural"])
+    land_count = sum(stats.get(t, 0) for t in LAND_TERRAINS)
     water_count = stats.get("ocean", 0) + stats.get("coast", 0)
 
     parts: List[str] = []
@@ -410,10 +544,14 @@ def render_svg(result: MapResult, title: str) -> str:
         parts.append(f'<circle cx="{cx:.1f}" cy="{cy:.1f}" r="10.5" fill="#fff7c2" stroke="#a57923" stroke-width="2"/>')
         parts.append(f'<text x="{cx:.1f}" y="{cy+4:.1f}" font-family="Arial, sans-serif" font-size="10.5" text-anchor="middle" fill="#6b4312" font-weight="bold">S{idx}</text>')
 
+    if show_tiles:
+        parts.extend(render_tile_overlay(result))
+
     legend_x = 36
     legend_y = board_height + 12
-    parts.append(f'<rect x="{legend_x-10}" y="{legend_y-8}" width="{width-52}" height="74" rx="8" fill="#f3ead6" opacity="0.94"/>')
-    parts.append(f'<text x="{legend_x}" y="{legend_y+10}" font-family="Arial, sans-serif" font-size="12" fill="#2a2620" font-weight="bold">Legenda: S = start gracza, ? = zeton odkryc poza strefa startowa</text>')
+    legend_note = " | kafle: A1-E8 po 7 heksow" if show_tiles else ""
+    parts.append(f'<rect x="{legend_x-10}" y="{legend_y-8}" width="{width-52}" height="82" rx="8" fill="#f3ead6" opacity="0.94"/>')
+    parts.append(f'<text x="{legend_x}" y="{legend_y+10}" font-family="Arial, sans-serif" font-size="12" fill="#2a2620" font-weight="bold">Legenda: S = start gracza, ? = zeton odkryc poza strefa startowa{legend_note}</text>')
 
     legend_items = [
         ("R", "rowniny", "plains"), ("L", "las", "forest"), ("WZ", "wzgorza", "hills"),
@@ -424,7 +562,7 @@ def render_svg(result: MapResult, title: str) -> str:
         x = legend_x + (i % 5) * 133
         y = legend_y + 35 + (i // 5) * 22
         parts.append(f'<rect x="{x}" y="{y-11}" width="17" height="13" fill="{TERRAIN_COLORS[terrain_type]}" stroke="#333" stroke-width="0.5"/>')
-        parts.append(f'<text x="{x+23}" y="{y}" font-family="Arial, sans-serif" font-size="11" fill="#2a2620">{code} — {name}</text>')
+        parts.append(f'<text x="{x+23}" y="{y}" font-family="Arial, sans-serif" font-size="11" fill="#2a2620">{code} - {name}</text>')
 
     parts.append("</svg>")
     return "\n".join(parts)
@@ -432,17 +570,34 @@ def render_svg(result: MapResult, title: str) -> str:
 
 def write_json(result: MapResult, path: Path) -> None:
     stats = terrain_stats(result.terrain)
+    tiles = tile_cells(result.tile_assignments)
     data = {
         "seed": result.seed,
         "variant": result.variant,
         "land_scale": result.land_scale,
         "cols": COLS,
         "rows": ROWS,
+        "tile_cols": TILE_COLS,
+        "tile_rows": TILE_ROWS,
+        "tile_capacity": TILE_CAPACITY,
         "terrain_stats": stats,
         "starts": [{"col": c, "row": r} for c, r in result.starts],
         "discovery_tokens": [{"col": c, "row": r} for c, r in result.discovery_tokens],
+        "tiles": [
+            {
+                "id": tid,
+                "type": classify_tile(cells, result.terrain, result.starts),
+                "cells": [{"col": col, "row": row} for col, row in sorted(cells, key=lambda p: (p[1], p[0]))],
+            }
+            for tid, cells in sorted(tiles.items())
+        ],
         "terrain": [
-            {"col": col, "row": row, "terrain": result.terrain[(col, row)]}
+            {
+                "col": col,
+                "row": row,
+                "terrain": result.terrain[(col, row)],
+                "tile": result.tile_assignments[(col, row)],
+            }
             for row in range(ROWS)
             for col in range(COLS)
         ],
@@ -450,18 +605,19 @@ def write_json(result: MapResult, path: Path) -> None:
     path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
 
 
-def write_index(output_dir: Path, svg_files: List[Path]) -> None:
+def write_index(output_dir: Path, svg_files: List[Path], show_tiles: bool) -> None:
     cards = []
     for svg in svg_files:
         cards.append(
             f'<section class="card"><h2>{svg.stem}</h2><img src="{svg.name}" alt="{svg.stem}" /></section>'
         )
 
+    tile_note = " Granice 40 kafli sa wlaczone." if show_tiles else ""
     html = f"""<!doctype html>
 <html lang="pl">
 <head>
   <meta charset="utf-8" />
-  <title>Epoki Imperiów — generator map</title>
+  <title>Epoki Imperiów - generator map</title>
   <style>
     body {{ margin: 0; font-family: Arial, sans-serif; background: #111820; color: #f2efe6; }}
     header {{ padding: 24px 32px; background: #18354a; }}
@@ -474,8 +630,8 @@ def write_index(output_dir: Path, svg_files: List[Path]) -> None:
 </head>
 <body>
   <header>
-    <h1>Epoki Imperiów — wygenerowane szkielety map</h1>
-    <p>Prototyp 0.2: wiekszy kontynent, mniej oceanu, starty na lądzie, żetony odkryć poza strefą startową.</p>
+    <h1>Epoki Imperiów - wygenerowane szkielety map</h1>
+    <p>Prototyp 0.3: wiekszy kontynent, mniej oceanu, starty na ladzie, zetony odkryc poza strefa startowa.{tile_note}</p>
   </header>
   <main>
     {''.join(cards)}
@@ -492,6 +648,7 @@ def main() -> None:
     parser.add_argument("--count", type=int, default=10, help="Liczba map do wygenerowania")
     parser.add_argument("--players", type=int, default=6, help="Liczba startow graczy")
     parser.add_argument("--land-scale", type=float, default=1.14, help="Ilosc ladu. 1.00 = mniej ladu, 1.14 = standard, 1.22 = bardzo duzo ladu")
+    parser.add_argument("--show-tiles", action="store_true", help="Pokaz granice 40 kafli po 7 heksow")
     parser.add_argument("--output", type=Path, default=Path("outputs"), help="Folder wyjsciowy")
     args = parser.parse_args()
 
@@ -507,13 +664,18 @@ def main() -> None:
         svg_path = args.output / f"{name}.svg"
         json_path = args.output / f"{name}.json"
 
-        svg_path.write_text(render_svg(result, title=f"Epoki Imperiow — wariant mapy {number:02d}"), encoding="utf-8")
+        svg_path.write_text(
+            render_svg(result, title=f"Epoki Imperiow - wariant mapy {number:02d}", show_tiles=args.show_tiles),
+            encoding="utf-8",
+        )
         write_json(result, json_path)
         svg_files.append(svg_path)
 
-    write_index(args.output, svg_files)
+    write_index(args.output, svg_files, show_tiles=args.show_tiles)
     print(f"Wygenerowano {len(svg_files)} map w folderze: {args.output}")
     print(f"Podglad HTML: {args.output / 'index.html'}")
+    if args.show_tiles:
+        print("Tryb kafli: wlaczony (--show-tiles).")
 
 
 if __name__ == "__main__":
