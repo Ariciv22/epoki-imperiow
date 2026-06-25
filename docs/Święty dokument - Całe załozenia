@@ -1,0 +1,741 @@
+Święty dokument!!!
+
+# Epoki Imperiów — kontekst projektu alfa 0.1
+
+Ten plik jest skróconym, ale kompletnym kontekstem projektu planszówki strategicznej **Epoki Imperiów**. Używaj go jako punktu startowego w nowych promptach, aby kontynuować projekt bez tłumaczenia wszystkiego od nowa.
+
+Gra jest inspirowana **Civilization V**, **7 Cudów Świata** i edytorem map Civ V. Ma być strategiczną planszówką 2–6 graczy z mapą heksową, rozwojem cywilizacji, liderami, technologiami, miastami, wojną, handlem, politykami, cudami i wieloma warunkami zwycięstwa.
+
+Religia/wierzenia są na razie **pominięte** i mogą wrócić później jako moduł opcjonalny.
+
+---
+
+## Ogólne założenia gry
+
+- Robocza nazwa: **Epoki Imperiów**.
+- Mapa heksowa typu **Pangea**.
+- Stała mapa: **40 kafli 7-heksowych = 280 heksów**.
+- Gra trwa maksymalnie **60 rund**.
+- Każdy gracz zaczyna z **1 Osadnikiem i 1 Wojownikiem**, bez gotowej stolicy.
+- Maksymalnie **4 miasta na gracza**: 1 stolica + 3 zwykłe miasta.
+- Cywilizacja i lider są **osobnymi kartami**.
+- Każdy gracz ma 5 zasobów: żywność, produkcja, złoto, nauka, kultura.
+- Limit na planszetce: **20 żetonów każdego zasobu**.
+- Tura gracza: dochód → wydawanie zasobów/handel/dyplomacja → aktywacja jednostek → efekty końca tury.
+
+---
+
+# Moduł 1 — mapa i teren
+
+## Kafle mapy
+
+Mapa składa się z **40 kafli**, każdy ma 7 heksów. Kafle zawsze pasują do siebie, bo ich brzegi są neutralne/przejściowe. Środek kafla pokazuje główny charakter regionu.
+
+Zatwierdzony zestaw kafli:
+
+| Typ kafla | Ilość |
+|---|---:|
+| Równiny | 7 |
+| Las | 6 |
+| Wzgórza | 5 |
+| Góry | 4 |
+| Rzeka / dolina | 5 |
+| Jezioro | 3 |
+| Pustynia | 3 |
+| Bagna | 2 |
+| Dżungla | 2 |
+| Tundra | 1 |
+| Wybrzeże | 1 |
+| Morze / archipelag | 1 |
+| Razem | 40 |
+
+## Teren łatwy
+
+Ruch kosztuje 1 akcję, brak bonusu obronnego:
+
+- równiny,
+- rzeka/dolina,
+- pustynia,
+- tundra,
+- wybrzeże/plaża.
+
+## Teren trudny
+
+Ruch kosztuje 2 akcje, obrońca dostaje +1:
+
+- las,
+- wzgórza,
+- bagna,
+- dżungla.
+
+## Teren niedostępny na początku
+
+- góry,
+- jezioro,
+- morze/archipelag.
+
+---
+
+# Moduł 2 — miasta, granice i wpływy
+
+## Start gracza
+
+Każdy gracz zaczyna z:
+
+- 1 Osadnikiem,
+- 1 Wojownikiem.
+
+Gracz nie ma gotowej stolicy. Osadnik może od razu założyć stolicę albo najpierw szukać lepszego miejsca.
+
+## Osadnik
+
+- Osadnik ma 2 akcje na turę.
+- Ruch o 1 heks kosztuje 1 akcję na łatwym terenie.
+- Założenie miasta zużywa całą aktywację Osadnika.
+- Po założeniu miasta Osadnik znika.
+
+Niechroniony Osadnik może zostać przejęty albo zniszczony przez wroga. Jeśli jest z Wojownikiem, najpierw trzeba pokonać Wojownika.
+
+## Zakładanie miasta
+
+Nie można zakładać miasta na:
+
+- górach,
+- jeziorze,
+- morzu,
+- cudzie naturalnym,
+- polu zajętym przez wroga.
+
+## Limit i odległość miast
+
+- Maksymalnie 4 miasta na gracza.
+- Nowe miasto musi być minimum **4 heksy** od innego miasta.
+- Odległość 1, 2 albo 3 heksy jest za mała.
+
+## Granice miasta
+
+Po założeniu miasto kontroluje 7 heksów: centrum + 6 dookoła.
+
+Maksymalny rozmiar miasta to **13 heksów**:
+
+- 7 startowych,
+- do 6 dodatkowych.
+
+Dodatkowy heks można zdobyć:
+
+| Sposób | Koszt |
+|---|---:|
+| Kulturą | 3 kultury |
+| Złotem | 3 złota |
+
+Heks musi być połączony z obecnymi granicami miasta i znajdować się maksymalnie 3 heksy od centrum.
+
+## Dochód bazowy miast
+
+Stolica:
+
+| Zasób | Ilość |
+|---|---:|
+| Żywność | 2 |
+| Produkcja | 2 |
+| Złoto | 1 |
+| Nauka | 1 |
+| Kultura | 1 |
+
+Zwykłe miasto:
+
+| Zasób | Ilość |
+|---|---:|
+| Żywność | 1 |
+| Produkcja | 1 |
+| Złoto | 1 |
+| Nauka | 1 |
+| Kultura | 0 |
+
+## Aktywowanie heksów
+
+Oprócz dochodu bazowego miasta aktywują heksy:
+
+| Miasto | Aktywowane heksy na turę |
+|---|---:|
+| Stolica | 3 |
+| Zwykłe miasto | 2 |
+
+---
+
+# Moduł 3 — jednostki i wojna
+
+## Jednostki podstawowe
+
+| Jednostka | Typ | HP | Siła | Akcje | Zasięg | Koszt |
+|---|---|---:|---:|---:|---:|---|
+| Osadnik | cywilna | 1 | 0 | 2 | 0 | 4 produkcji + 2 żywności |
+| Robotnik | cywilna | 1 | 0 | 2 | 0 | 3 produkcji |
+| Wojownik | wręcz | 4 | 2 | 2 | 1 | 3 produkcji |
+| Łucznik | dystansowa | 3 | 1 | 2 | 2 | 3 produkcji |
+| Włócznik | wręcz | 4 | 3 | 2 | 1 | 4 produkcji |
+| Jeździec | konna | 4 | 2 | 3 | 1 | 4 produkcji + Konie |
+| Katapulta | oblężnicza | 3 | 2 / 4 przeciw miastom | 2 | 2 | 5 produkcji |
+
+## Walka
+
+Atakujący rzuca: **K6 + siła jednostki**.
+
+Obrońca rzuca: **K6 + siła jednostki + bonus terenu**.
+
+Miasto broni się rzutem: **K6 + obrona miasta + bonus terenu miasta**.
+
+Wynik:
+
+| Różnica | Efekt |
+|---|---|
+| Remis | obie strony tracą 1 HP |
+| Wygrana o 1–2 | przegrany traci 1 HP |
+| Wygrana o 3+ | przegrany traci 2 HP |
+
+## Miasta w walce
+
+| Typ miasta | Obrona | HP |
+|---|---:|---:|
+| Zwykłe miasto | 5 | 5 |
+| Stolica | 7 | 7 |
+
+Miasto zdobywa się, gdy jego HP spadnie do 0.
+
+Po zdobyciu miasta atakujący wybiera:
+
+1. przejmij miasto,
+2. splądruj miasto,
+3. zniszcz miasto,
+4. wymuś traktat,
+5. uczyń wasalem,
+6. zmień miasto w garnizon.
+
+Stolicy nie można zniszczyć.
+
+## Ruch, atak i leczenie
+
+- Atak wręcz zużywa całą aktywację.
+- Atak dystansowy zużywa aktywację, ale dystansowy zwykle nie traci HP przy porażce.
+- Wyjątek: jeśli dystansowy atakuje miasto, a miasto wygra o 3+, dystansowy traci 1 HP.
+- Leczenie zużywa całą aktywację i daje +2 HP.
+- Plądrowanie ulepszonego heksa przeciwnika zużywa całą aktywację, daje +1 HP jednostce, +1 złota graczowi i zmienia heks w zniszczony.
+
+## Katapulta
+
+- Ustawienie: 1 akcja.
+- Atak: 1 akcja.
+- Ruch anuluje ustawienie.
+- Jeśli katapulta zaczyna turę nieustawiona i nie ruszy się, może wykonać ustawienie + atak.
+
+## Limit jednostek
+
+Na jednym heksie może stać maksymalnie:
+
+- 1 jednostka wojskowa,
+- 1 jednostka cywilna.
+
+Każde miasto pozwala utrzymać 2 jednostki wojskowe.
+
+Limit cywilnych: 6 na gracza.
+
+## Doświadczenie
+
+Progi awansów:
+
+| XP | Efekt |
+|---:|---|
+| 10 | Awans I |
+| 20 | Awans II |
+| 30 | Awans III |
+| 40 | Awans IV |
+
+Maksymalnie 4 awanse.
+
+Przykładowe awanse: Weteran, Twardziel, Mobilny, Medyk, Niszczyciel, Obrońca, Oblężnik, Strzelec wyborowy, Szybki marsz, Łowca barbarzyńców.
+
+---
+
+# Moduł 4 — technologie i epoki
+
+Epoki:
+
+1. Starożytność
+2. Epoka klasyczna
+3. Średniowiecze
+4. Renesans
+5. Industrializacja
+6. Era współczesna
+
+Każda epoka ma 10 technologii, po 2 w każdej ścieżce:
+
+- wojskowa,
+- gospodarcza,
+- handlowa,
+- kulturowa,
+- naukowa.
+
+Aby przejść do następnej epoki, gracz musi odkryć **6 technologii z aktualnej epoki**.
+
+Koszty technologii:
+
+| Epoka | Koszt 1 technologii |
+|---|---:|
+| Starożytność | 5 nauki |
+| Epoka klasyczna | 7 nauki |
+| Średniowiecze | 10 nauki |
+| Renesans | 13 nauki |
+| Industrializacja | 16 nauki |
+| Era współczesna | 20 nauki |
+
+Ważne technologie:
+
+- Łucznictwo odblokowuje Łucznika.
+- Obróbka brązu odblokowuje Włócznika.
+- Rolnictwo pozwala ulepszać równiny i rzeki/doliny.
+- Górnictwo pozwala ulepszać wzgórza i lasy.
+- Handel wymienny odblokowuje pierwszy szlak handlowy.
+- Pismo odblokowuje Bibliotekę.
+- Ceramika odblokowuje Spichlerz.
+- Filozofia zwiększa limit polityk.
+- Kodeks praw zwiększa limit polityk.
+- Ideologie zwiększają limit polityk.
+- Rakiety i Program kosmiczny są potrzebne do zwycięstwa naukowego.
+
+---
+
+# Moduł 5 — budynki, zasoby i koszty
+
+## Budynki
+
+Budynki są lokalne i działają tylko w mieście, w którym zostały zbudowane.
+
+| Budynek | Technologia | Koszt produkcji | Koszt złota | Efekt |
+|---|---|---:|---:|---|
+| Spichlerz | Ceramika | 4 | 6 | +1 żywności co turę |
+| Biblioteka | Pismo | 4 | 6 | +1 nauki co turę |
+| Targ | Monety | 4 | 6 | +1 złota co turę |
+| Teatr | Teatr | 5 | 7 | +1 kultury co turę |
+| Warsztat | Gildie rzemieślnicze | 5 | 7 | +1 produkcji co turę |
+| Koszary | Obróbka brązu / Żelazo | 5 | 7 | jednostki z tego miasta startują z +2 XP |
+| Mury | Fortyfikacje | 5 | 7 | +2 obrony miasta |
+| Port | Żegluga prymitywna / Nawigacja | 5 | 7 | +1 złota z handlu wodnego albo wybrzeża |
+
+## Zasoby na mapie
+
+Na mapie jest 44 zasoby:
+
+| Typ zasobu | Ilość |
+|---|---:|
+| Strategiczne | 12 |
+| Luksusowe | 14 |
+| Żywnościowe | 18 |
+
+Strategiczne:
+
+- Konie x3
+- Żelazo x3
+- Kamień x2
+- Węgiel x2
+- Ropa x1
+- Uran x1
+
+Luksusowe:
+
+- Wino x2
+- Przyprawy x2
+- Jedwab x2
+- Futra x2
+- Perły x2
+- Marmur x1
+- Złoto x2
+- Srebro x1
+
+Żywnościowe:
+
+- Zboże x4
+- Bydło x4
+- Ryby x3
+- Zwierzyna x4
+- Owoce x3
+
+Zasób działa tylko, gdy:
+
+1. jest w granicach miasta,
+2. heks jest ulepszony przez Robotnika,
+3. heks nie jest zniszczony.
+
+---
+
+# Moduł 6 — cywilizacje i liderzy
+
+Cywilizacja i lider są osobno.
+
+Gracz ma:
+
+- 1 kartę cywilizacji — stały bonus,
+- 1 kartę lidera — zdolność specjalna.
+
+Tryby:
+
+- historyczny,
+- losowy,
+- draft: dobierz 2 cywilizacje i 2 liderów, wybierz po 1.
+
+## 30 cywilizacji
+
+Rzym, Egipt, Grecja, Chiny, Persja, Mongołowie, Wikingowie, Fenicjanie, Babilon, Japonia, Indie, Aztekowie, Majowie, Inkowie, Arabia, Kartagina, Bizancjum, Francja, Anglia, Hiszpania, Niemcy, Rosja, Polska, Osmanowie, Korea, Etiopia, Zulu, Holandia, Portugalia, Mali.
+
+Każda cywilizacja ma jeden zbalansowany stały bonus, np. Rzym wzmacnia ekspansję miast, Egipt cuda, Babilon naukę, Mongołowie kawalerię, Polska kulturę i elastyczność, Mali złoto.
+
+## 30 liderów
+
+Juliusz Cezar, Kleopatra, Perykles, Qin Shi Huang, Cyrus Wielki, Czyngis-chan, Ragnar Lodbrok, Hiram I, Hammurabi, Tokugawa Ieyasu, Aśoka, Montezuma, Pakal, Pachacuti, Harun ar-Raszid, Hannibal, Justynian I, Ludwik XIV, Elżbieta I, Izabela Kastylijska, Otto von Bismarck, Katarzyna Wielka, Kazimierz Wielki, Sulejman Wspaniały, Sejong Wielki, Haile Selassie, Shaka, Wilhelm Orański, Henryk Żeglarz, Mansa Musa.
+
+Bonusy liderów są zbalansowane: zwykle działają raz na epokę, raz na turę albo w konkretnej sytuacji. Nie mają dawać efektu „wygrywam sam z siebie”.
+
+---
+
+# Moduł 7 — karty wydarzeń i osobiste
+
+## Wydarzenia globalne
+
+- 30 kart.
+- Od rundy 2 na początku każdej rundy odkrywa się 1 wydarzenie globalne.
+- Działa na wszystkich graczy.
+- Typy: klimatyczne, społeczne, wojenne, gospodarcze, naukowe, kulturowe, dyplomatyczne, barbarzyńskie.
+
+Przykłady: Susza, Urodzaj, Powódź, Ostra zima, Burze na morzu, Migracja ludności, Kryzys kupiecki, Rozwój nauki, Festiwal sztuki, Najazd barbarzyńców.
+
+## Karty osobiste
+
+- 30 kart.
+- Gracz może dobrać kartę osobistą w fazie wydawania zasobów.
+- Koszt dobrania: **2 żywności + 2 kultury**.
+- Limit ręki: 3 karty.
+- Limit zagrywania: 1 karta osobista na turę.
+- Zagranie jest darmowe, chyba że karta mówi inaczej.
+
+Przykłady kart: Doświadczony Zarządca, Młody Uczony, Nadworny Artysta, Kupiec Karawanowy, Mistrz Budowlany, Werbownik, Medyk Polowy, Szpieg Dworski, Lokalny Bohater, Inspirujące Przemówienie.
+
+---
+
+# Moduł 8 — polityki i ustroje
+
+Polityki kupuje się za kulturę.
+
+Przy zakupie:
+
+1. dobierz 2 karty polityki,
+2. wybierz 1,
+3. drugą odłóż na spód talii.
+
+Koszt dobrania polityki:
+
+| Etap gry | Koszt |
+|---|---:|
+| Starożytność / Klasyczna | 4 kultury |
+| Średniowiecze / Renesans | 6 kultury |
+| Industrializacja / Współczesność | 8 kultury |
+
+Limit aktywnych polityk:
+
+| Warunek | Limit |
+|---|---:|
+| Start gry | 1 |
+| Filozofia | 2 |
+| Kodeks praw | 3 |
+| Ideologie | 4 |
+
+Zmiana aktywnej polityki kosztuje 2 kultury.
+
+Typy polityk:
+
+- militarne,
+- gospodarcze,
+- handlowe,
+- kulturowe,
+- naukowe.
+
+Talia ma 30 kart: po 6 na każdy typ.
+
+---
+
+# Moduł 9 — handel i dyplomacja
+
+Handel i dyplomacja są w fazie wydawania zasobów.
+
+Można handlować:
+
+- złotem,
+- żywnością,
+- produkcją,
+- zasobami strategicznymi,
+- zasobami luksusowymi,
+- kartami osobistymi,
+- heksami,
+- miastami w traktacie pokojowym.
+
+Nie można handlować:
+
+- nauką,
+- kulturą,
+- kartami polityk.
+
+Zasoby strategiczne i luksusowe przekazuje się standardowo na **3 rundy**.
+
+## Umowy
+
+- Rozejm: 2 rundy bez ataku.
+- Sojusz: 3 rundy bez ataku.
+- Pakt handlowy: pierwszy zewnętrzny szlak między graczami daje +1 złota właścicielowi szlaku.
+- Wspólna wojna: gracze deklarują wojnę temu samemu przeciwnikowi.
+- Pokój: wymaga zgody obu stron, daje 2 rundy rozejmu.
+
+## Szlaki handlowe
+
+Limit szlaków:
+
+| Technologia | Limit |
+|---|---:|
+| Handel wymienny | 1 |
+| Drogi handlowe | 2 |
+| Kompania handlowa | 3 |
+| Globalny rynek | 4 |
+
+Szlak wewnętrzny: między własnymi miastami, daje +1 żywności albo +1 produkcji jednemu z miast.
+
+Szlak zewnętrzny: między graczem a innym graczem. Właściciel szlaku dostaje +2 złota, drugi gracz +1 złota.
+
+Szlak można splądrować jednostką wojskową stojącą na trasie szlaku. Plądrujący dostaje +2 złota, a szlak jest nieaktywny przez 1 rundę.
+
+---
+
+# Moduł 10 — cuda świata, cuda naturalne i odkrycia
+
+## Cuda świata
+
+- 30 cudów świata.
+- Po 5 na każdą epokę.
+- Każdy cud może zostać zbudowany tylko raz w całej grze.
+- Cud buduje się w konkretnym mieście.
+- Jedno miasto może mieć maksymalnie 2 cuda.
+- Cudów nie można kupować za złoto.
+- Cud działa od razu.
+- Jeśli miasto z cudem zostanie przejęte, cud przechodzi do zdobywcy.
+- Jeśli miasto zostanie splądrowane, cud nie działa przez 1 rundę.
+- Jeśli miasto zostanie zniszczone, cud znika z gry.
+
+Koszt cudów:
+
+| Epoka | Koszt |
+|---|---:|
+| Starożytność | 8 produkcji |
+| Klasyczna | 10 produkcji |
+| Średniowiecze | 12 produkcji |
+| Renesans | 14 produkcji |
+| Industrializacja | 16 produkcji |
+| Era współczesna | 18 produkcji |
+
+Przykłady cudów: Piramidy, Wielka Biblioteka, Stonehenge, Wiszące Ogrody, Koloseum, Wielka Latarnia, Partenon, Wielki Mur, Notre-Dame, Uniwersytet Sankore, Kaplica Sykstyńska, Taj Mahal, Wieża Eiffla, Big Ben, Projekt Manhattan, Program Apollo, Siedziba Narodów.
+
+## Cuda naturalne i żetony odkryć
+
+Na mapie są zakryte **żetony odkryć**. Gracze widzą żeton, ale nie wiedzą, co jest pod spodem.
+
+Pod żetonem może być:
+
+- puste pole,
+- zwykłe miejsce bez nagrody,
+- ruiny,
+- zagubione zasoby,
+- zagrożenie,
+- specjalne miejsce,
+- cud naturalny.
+
+Zasady:
+
+- Na heksie startowym i do 2 heksów od startowego Osadnika nie ma żetonów odkryć.
+- Pierwsze żetony mogą pojawić się od 3 heksa od pozycji startowej.
+- Żeton odkrywa się, gdy jednostka wejdzie na heks z żetonem.
+- Każdy żeton jest jednorazowy i po rozpatrzeniu znika.
+- Jeśli żeton okaże się cudem naturalnym, gracz dostaje +2 kultury albo +2 nauki, żeton znika, a na heksie zostaje znacznik cudu naturalnego.
+- Jednostka, która odkryła cud naturalny, musi natychmiast zejść na sąsiedni legalny heks. Jeśli nie może, wraca na heks, z którego weszła.
+- Cudu naturalnego nie można zbudować, ulepszyć, splądrować, zniszczyć ani zabudować miastem.
+- Cud naturalny działa, jeśli znajduje się w granicach miasta gracza.
+
+W jednej partii używa się 3 cudów naturalnych z puli 6. Muszą być rozmieszczone:
+
+- zgodnie z typem terenu,
+- co najmniej 4 heksy od startowych Osadników,
+- co najmniej 4 heksy od siebie.
+
+Pula 6 cudów naturalnych:
+
+- Wielka Rafa,
+- Kilimandżaro,
+- Wielki Kanion,
+- Góra Synaj,
+- Gejzery,
+- Wodospad Wiktorii.
+
+---
+
+# Moduł 11 — warunki zwycięstwa
+
+## Militarne
+
+Gracz wygrywa, jeśli kontroluje swoją stolicę i przejął 2 stolice przeciwników.
+
+W grze 2-osobowej wystarczy przejąć stolicę przeciwnika.
+
+## Naukowe
+
+Wymagania:
+
+1. wejść do Ery współczesnej,
+2. odkryć Rakiety,
+3. odkryć Program kosmiczny,
+4. zbudować Program Apollo,
+5. zapłacić 10 nauki + 10 produkcji.
+
+## Kulturowe
+
+Gracz wygrywa po zdobyciu 20 punktów prestiżu kulturowego.
+
+Prestiż jest osobnym torem, innym niż kultura jako zasób.
+
+Źródła prestiżu: cuda świata, cuda naturalne, polityki kulturowe, pełny zestaw polityk, Teatry w 3 miastach, specjalne wydarzenia.
+
+## Handlowe
+
+Wymagania:
+
+- 4 aktywne szlaki handlowe,
+- 20 złota,
+- 5 różnych zasobów luksusowych kontrolowanych lub z umów.
+
+## Dyplomatyczne
+
+Wymagania:
+
+- 15 wpływu dyplomatycznego,
+- kontrola Siedziby Narodów.
+
+Wpływ dyplomatyczny zdobywa się za sojusze, pokój, mediację, pakty handlowe, pomoc wojskową i wydarzenia.
+
+## Punktowe po 60 rundach
+
+Jeśli nikt nie wygra wcześniej, po 60 rundzie liczy się punkty.
+
+| Element | Punkty |
+|---|---:|
+| Każde miasto | +3 |
+| Każda stolica przeciwnika | +5 |
+| Każdy cud świata | +4 |
+| Każdy cud naturalny | +3 |
+| Każda technologia | +1 |
+| Każda aktywna polityka | +2 |
+| Każde 5 złota | +1 |
+| Każdy aktywny szlak handlowy | +2 |
+| Każdy awans jednostki | +1 |
+| Każdy aktywny zasób strategiczny/luksusowy | +1 |
+
+Remisy rozstrzygają kolejno:
+
+1. więcej przejętych stolic,
+2. więcej cudów świata,
+3. więcej technologii,
+4. więcej złota,
+5. jeśli nadal remis — współzwycięstwo.
+
+---
+
+# Moduł 12 — religia
+
+Religia/wierzenia są na razie **pominięte**. Można je dodać później jako moduł opcjonalny.
+
+---
+
+# Moduł 13 — setup i komponenty
+
+## Setup skrócony
+
+1. Ułóż 40 kafli mapy.
+2. Rozstaw pozycje startowe graczy, minimum 8 heksów od siebie.
+3. Każdy gracz bierze Osadnika i Wojownika.
+4. Usuń możliwość odkryć w promieniu 2 heksów od startowego Osadnika.
+5. Wylosuj 3 cuda naturalne i ukryj je wśród żetonów odkryć zgodnie z zasadami.
+6. Rozłóż żetony odkryć na dozwolonych heksach.
+7. Rozłóż 44 zasoby na mapie.
+8. Przygotuj talie: wydarzenia globalne, osobiste, polityki, technologie, cywilizacje, liderzy, cuda świata.
+9. Gracze wybierają cywilizację i lidera.
+10. W pierwszej rundzie nie ma wydarzenia globalnego i neutralni jeszcze nie działają.
+11. Od rundy 2 działa wydarzenie globalne.
+12. Od rundy 5 działają neutralni.
+
+## Komponenty fizyczne — skrót
+
+- 40 kafli mapy.
+- 280 żetonów odkryć.
+- 44 żetony zasobów mapy.
+- 30 kart cywilizacji.
+- 30 kart liderów.
+- 60 kart technologii.
+- 30 kart polityk.
+- 30 kart wydarzeń globalnych.
+- 30 kart osobistych.
+- 30 kart cudów świata.
+- Znaczniki miast, stolic, ulepszeń, zniszczeń, dróg, szlaków, rozejmów, sojuszy, okupacji.
+- Planszetki graczy i miast.
+- Jednostki graczy i neutralnych.
+- Suwaki albo znaczniki HP/XP.
+
+---
+
+# Kolejność rundy i tury
+
+## Początek rundy
+
+- Od rundy 2 odkryj 1 wydarzenie globalne.
+- Rozpatrz efekt wydarzenia.
+
+## Tura gracza
+
+1. Dochód z miast i aktywowanych heksów.
+2. Wydawanie zasobów, handel i dyplomacja.
+3. Aktywacja jednostek.
+4. Efekty końca tury.
+5. Koniec tury.
+
+## Koniec rundy
+
+Po turze ostatniego gracza:
+
+1. faza neutralnych,
+2. efekty końca rundy,
+3. przesunięcie licznika rundy.
+
+---
+
+# Rzeczy do dopracowania po testach
+
+- Balans kosztów technologii, budynków, cudów i jednostek.
+- Czy 60 rund to dobra długość.
+- Czy 280 żetonów odkryć nie jest za dużo fizycznie.
+- Dokładne rozmieszczenie zasobów według terenów.
+- Dokładne efekty wszystkich 30 cywilizacji i 30 liderów w kartach.
+- Pełne karty technologii, wydarzeń, polityk i cudów w formacie drukowanym.
+- Czy miasta są za mocne lub za słabe w wojnie.
+- Czy każdy typ zwycięstwa jest realny.
+- Balans neutralnych.
+- Czy handel i dyplomacja są wystarczająco opłacalne.
+- Czy prestiż kulturowy, wpływ dyplomatyczny i zwycięstwo handlowe nie wymagają korekt liczbowych.
+
+---
+
+# Najważniejszy kontekst do dalszych promptów
+
+Projekt jest na etapie **alfa 0.1**. Rdzeń gry jest zaprojektowany, ale wymaga uporządkowania do instrukcji, kart, planszetek i testów balansu. Użytkownik chce rozwijać projekt modułowo, zatwierdzać decyzje krok po kroku i zachować klimat strategicznej gry cywilizacyjnej, ale bez przesadnego skomplikowania.
+
+W przyszłych rozmowach należy kontynuować na bazie tych zasad, chyba że użytkownik poprosi o zmianę konkretnego modułu.
