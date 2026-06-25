@@ -1,6 +1,12 @@
 const MAP_BASE_WIDTH = 1120;
 const MAP_ZOOM_LEVELS = [1.45, 2.35, 3.45];
 let mapZoomIndex = 0;
+let isDraggingMap = false;
+let dragStartX = 0;
+let dragStartY = 0;
+let dragStartScrollLeft = 0;
+let dragStartScrollTop = 0;
+let activeDragPointerId = null;
 
 function getMapZoom() {
   return MAP_ZOOM_LEVELS[mapZoomIndex];
@@ -42,6 +48,61 @@ function zoomMapFromWheel(event) {
   applyMapZoomToPointer(MAP_ZOOM_LEVELS[mapZoomIndex], event.clientX, event.clientY);
 }
 
+function startMapDrag(event) {
+  if (event.button !== 0) return;
+
+  const boardWrap = document.querySelector('.board-wrap');
+  if (!boardWrap) return;
+
+  isDraggingMap = true;
+  activeDragPointerId = event.pointerId;
+  dragStartX = event.clientX;
+  dragStartY = event.clientY;
+  dragStartScrollLeft = boardWrap.scrollLeft;
+  dragStartScrollTop = boardWrap.scrollTop;
+
+  boardWrap.classList.add('is-dragging-map');
+  boardWrap.setPointerCapture(event.pointerId);
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function moveMapDrag(event) {
+  if (!isDraggingMap || event.pointerId !== activeDragPointerId) return;
+
+  const boardWrap = document.querySelector('.board-wrap');
+  if (!boardWrap) return;
+
+  const deltaX = event.clientX - dragStartX;
+  const deltaY = event.clientY - dragStartY;
+
+  boardWrap.scrollLeft = dragStartScrollLeft - deltaX;
+  boardWrap.scrollTop = dragStartScrollTop - deltaY;
+
+  event.preventDefault();
+  event.stopPropagation();
+}
+
+function endMapDrag(event) {
+  if (!isDraggingMap || event.pointerId !== activeDragPointerId) return;
+
+  const boardWrap = document.querySelector('.board-wrap');
+  if (!boardWrap) return;
+
+  isDraggingMap = false;
+  activeDragPointerId = null;
+  boardWrap.classList.remove('is-dragging-map');
+
+  try {
+    boardWrap.releasePointerCapture(event.pointerId);
+  } catch (error) {
+    // Pointer capture may already be released by the browser.
+  }
+
+  event.preventDefault();
+  event.stopPropagation();
+}
+
 function setupMapZoom() {
   const boardWrap = document.querySelector('.board-wrap');
   if (!boardWrap) return;
@@ -51,6 +112,16 @@ function setupMapZoom() {
     event.stopPropagation();
     zoomMapFromWheel(event);
   }, { passive: false });
+
+  boardWrap.addEventListener('pointerdown', startMapDrag);
+  boardWrap.addEventListener('pointermove', moveMapDrag);
+  boardWrap.addEventListener('pointerup', endMapDrag);
+  boardWrap.addEventListener('pointercancel', endMapDrag);
+  boardWrap.addEventListener('lostpointercapture', () => {
+    isDraggingMap = false;
+    activeDragPointerId = null;
+    boardWrap.classList.remove('is-dragging-map');
+  });
 
   setBoardWidth(getMapZoom());
 }
