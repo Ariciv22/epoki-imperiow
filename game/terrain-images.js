@@ -1,42 +1,65 @@
 (() => {
-  const TERRAIN_IMAGES = {
-    ocean: '../grafiki/wybrzeze.png',
-    coast: '../grafiki/wybrzeze.png',
-    plains: '../grafiki/rowniny.png',
-    forest: '../grafiki/las.png',
-    hills: '../grafiki/wzgorza.png',
-    mountain: '../grafiki/gory.png',
-    desert: '../grafiki/pustynia.png',
-    lake: '../grafiki/obszar_zalewowy.png',
-    floodplain: '../grafiki/obszar_zalewowy.png',
-    tundra: '../grafiki/tundra.png',
-    natural: '../grafiki/gory.png'
+  const TERRAIN_FILES = {
+    ocean: 'wybrzeze.png',
+    coast: 'wybrzeze.png',
+    plains: 'rowniny.png',
+    forest: 'las.png',
+    hills: 'wzgorza.png',
+    mountain: 'gory.png',
+    desert: 'pustynia.png',
+    lake: 'obszar_zalewowy.png',
+    floodplain: 'obszar_zalewowy.png',
+    tundra: 'tundra.png',
+    natural: 'gory.png'
   };
 
+  const TERRAIN_IMAGE_DIRS = [
+    '/grafiki',
+    '../grafiki',
+    'grafiki',
+    '/Grafiki',
+    '../Grafiki',
+    'Grafiki'
+  ];
+
   const terrainImageCache = new Map();
+
+  function buildImageCandidates(type) {
+    const filename = TERRAIN_FILES[type];
+    if (!filename) return [];
+    return TERRAIN_IMAGE_DIRS.map((directory) => `${directory}/${filename}`);
+  }
 
   function loadTerrainImage(type) {
     const cached = terrainImageCache.get(type);
     if (cached && cached.status !== 'missing') return;
 
-    const src = TERRAIN_IMAGES[type];
-    if (!src) {
+    const candidates = buildImageCandidates(type);
+    if (candidates.length === 0) {
       terrainImageCache.set(type, { status: 'missing', src: null });
       return;
     }
 
     terrainImageCache.set(type, { status: 'loading', src: null });
 
-    const probe = new Image();
-    probe.onload = () => {
-      terrainImageCache.set(type, { status: 'loaded', src });
-      render();
-    };
-    probe.onerror = () => {
-      console.warn(`Nie znaleziono grafiki terenu: ${src}`);
-      terrainImageCache.set(type, { status: 'missing', src: null });
-    };
-    probe.src = src;
+    function tryNext(index) {
+      if (index >= candidates.length) {
+        console.warn(`Nie znaleziono grafiki terenu dla typu: ${type}`, candidates);
+        terrainImageCache.set(type, { status: 'missing', src: null });
+        return;
+      }
+
+      const src = candidates[index];
+      const probe = new Image();
+      probe.onload = () => {
+        terrainImageCache.set(type, { status: 'loaded', src });
+        render();
+      };
+      probe.onerror = () => tryNext(index + 1);
+      probe.src = src;
+    }
+
+    tryNext(0);
   }
 
   function getTerrainImage(type) {
