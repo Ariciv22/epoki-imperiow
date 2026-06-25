@@ -26,6 +26,7 @@ Pierwsze moduły projektu:
 
 ## Prototypy
 
+- [Prototyp gry w przeglądarce](game/README.md)
 - [Generator szkieletu mapy](prototypes/map-generator/README.md)
 
 ## Referencje wizualne
