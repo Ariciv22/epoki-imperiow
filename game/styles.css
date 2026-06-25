@@ -7,6 +7,7 @@
   --accent: #d9c38b;
   --accent-2: #5aa7c8;
   --danger: #d88a6a;
+  --ok: #96d98b;
 }
 
 * {
@@ -65,7 +66,7 @@ button:hover {
 
 .layout {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  grid-template-columns: 360px 1fr;
   min-height: calc(100vh - 86px);
 }
 
@@ -130,6 +131,42 @@ button:hover {
   line-height: 1.5;
 }
 
+.info-box strong {
+  color: var(--text);
+}
+
+.unit-card-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.unit-stat-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.unit-stat {
+  padding: 8px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.unit-stat span {
+  display: block;
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.unit-stat b {
+  display: block;
+  margin-top: 2px;
+  color: var(--text);
+}
+
 .log {
   height: 240px;
   overflow: auto;
@@ -176,10 +213,34 @@ button:hover {
   dominant-baseline: middle;
 }
 
+.move-target {
+  cursor: pointer;
+  opacity: 0.72;
+}
+
+.move-target:hover {
+  opacity: 0.95;
+}
+
 .token,
-.unit,
 .start-marker {
   pointer-events: none;
+}
+
+.unit {
+  cursor: pointer;
+  filter: drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35));
+}
+
+.unit:hover {
+  filter: brightness(1.12) drop-shadow(0 3px 3px rgba(0, 0, 0, 0.35));
+}
+
+.selected-unit-ring {
+  pointer-events: none;
+  fill: none;
+  stroke: #fff2c7;
+  stroke-width: 3;
 }
 
 .token-text,
