@@ -87,6 +87,17 @@ button {
   padding: 24px;
   overflow: auto;
   background: #111922;
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.board-wrap.is-dragging-map {
+  cursor: grabbing;
+}
+
+.board-wrap.is-dragging-map * {
+  cursor: grabbing !important;
 }
 
 #board {
