@@ -10,10 +10,11 @@
   <header class="topbar">
     <div>
       <h1>Epoki Imperiów</h1>
-      <p>Prototyp gry w przeglądarce — mapa, start, jednostki i żetony odkryć.</p>
+      <p>Prototyp gry w przeglądarce — mapa, jednostki, ruch i żetony odkryć.</p>
     </div>
     <div class="topbar-actions">
       <button id="new-map-button">Nowa mapa</button>
+      <button id="end-turn-button">Koniec tury</button>
       <button id="toggle-tokens-button">Pokaż / ukryj żetony</button>
     </div>
   </header>
@@ -22,8 +23,8 @@
     <aside class="panel">
       <h2>Aktualny moduł</h2>
       <div class="module-box">
-        <strong>Mapa + start gry</strong>
-        <p>Na razie kodujemy tylko zatwierdzony koncept: kontynent, start gracza, osadnik, wojownik i żetony odkryć poza strefą startową.</p>
+        <strong>Ruch jednostek</strong>
+        <p>Kliknij jednostkę, zobacz jej statystyki i kliknij podświetlone pole, żeby ją przesunąć.</p>
       </div>
 
       <h2>Stan gry</h2>
@@ -33,6 +34,9 @@
         <div><dt>Start</dt><dd id="start-value">—</dd></div>
         <div><dt>Odkryto</dt><dd id="discoveries-value">0</dd></div>
       </dl>
+
+      <h2>Wybrana jednostka</h2>
+      <div id="selected-unit" class="info-box">Kliknij osadnika albo wojownika.</div>
 
       <h2>Wybrane pole</h2>
       <div id="selected-hex" class="info-box">Kliknij heks na mapie.</div>
