@@ -1,31 +1,45 @@
-const MAP_ZOOM_LEVELS = [1.15, 1.55, 2.05];
-let mapZoomIndex = 1;
+const MAP_BASE_WIDTH = 1120;
+const MAP_ZOOM_LEVELS = [1.45, 2.35, 3.45];
+let mapZoomIndex = 0;
 
-function applyMapZoom() {
+function getMapZoom() {
+  return MAP_ZOOM_LEVELS[mapZoomIndex];
+}
+
+function setBoardWidth(zoom) {
+  const board = document.querySelector('#board');
+  if (!board) return;
+  board.style.width = `${Math.round(MAP_BASE_WIDTH * zoom)}px`;
+  board.dataset.zoom = String(zoom);
+}
+
+function applyMapZoomToPointer(nextZoom, pointerX, pointerY) {
   const boardWrap = document.querySelector('.board-wrap');
   const board = document.querySelector('#board');
   if (!boardWrap || !board) return;
 
-  const zoom = MAP_ZOOM_LEVELS[mapZoomIndex];
-  const oldCenterX = boardWrap.scrollLeft + boardWrap.clientWidth / 2;
-  const oldCenterY = boardWrap.scrollTop + boardWrap.clientHeight / 2;
-  const previousZoom = Number(board.dataset.zoom || MAP_ZOOM_LEVELS[0]);
+  const previousZoom = Number(board.dataset.zoom || getMapZoom());
+  const rect = boardWrap.getBoundingClientRect();
 
-  board.style.width = `${Math.round(1120 * zoom)}px`;
-  board.dataset.zoom = String(zoom);
+  const localX = pointerX - rect.left;
+  const localY = pointerY - rect.top;
+  const mapXBeforeZoom = (boardWrap.scrollLeft + localX) / previousZoom;
+  const mapYBeforeZoom = (boardWrap.scrollTop + localY) / previousZoom;
 
-  const ratio = previousZoom > 0 ? zoom / previousZoom : 1;
+  setBoardWidth(nextZoom);
+
   requestAnimationFrame(() => {
-    boardWrap.scrollLeft = oldCenterX * ratio - boardWrap.clientWidth / 2;
-    boardWrap.scrollTop = oldCenterY * ratio - boardWrap.clientHeight / 2;
+    boardWrap.scrollLeft = mapXBeforeZoom * nextZoom - localX;
+    boardWrap.scrollTop = mapYBeforeZoom * nextZoom - localY;
   });
 }
 
-function changeMapZoom(direction) {
-  const next = mapZoomIndex + direction;
-  if (next < 0 || next >= MAP_ZOOM_LEVELS.length) return;
-  mapZoomIndex = next;
-  applyMapZoom();
+function zoomMapFromWheel(event) {
+  const nextIndex = mapZoomIndex + (event.deltaY < 0 ? 1 : -1);
+  if (nextIndex < 0 || nextIndex >= MAP_ZOOM_LEVELS.length) return;
+
+  mapZoomIndex = nextIndex;
+  applyMapZoomToPointer(MAP_ZOOM_LEVELS[mapZoomIndex], event.clientX, event.clientY);
 }
 
 function setupMapZoom() {
@@ -34,10 +48,11 @@ function setupMapZoom() {
 
   boardWrap.addEventListener('wheel', (event) => {
     event.preventDefault();
-    changeMapZoom(event.deltaY < 0 ? 1 : -1);
+    event.stopPropagation();
+    zoomMapFromWheel(event);
   }, { passive: false });
 
-  applyMapZoom();
+  setBoardWidth(getMapZoom());
 }
 
 setupMapZoom();
