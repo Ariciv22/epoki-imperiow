@@ -22,6 +22,7 @@ Pierwsze moduły projektu:
 - [09 — Reguły generowania szkieletu mapy](docs/09-reguly-generowania-szkieletu-mapy.md)
 - [10 — Układ 40 kafli mapy](docs/10-uklad-40-kafli-mapy.md)
 - [11 — Ruch i jednostki](docs/11-ruch-i-jednostki.md)
+- [12 — Wygląd kafli w grze](docs/12-wyglad-kafli-w-grze.md)
 
 ## Prototypy
 
