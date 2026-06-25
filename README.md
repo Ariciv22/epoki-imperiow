@@ -21,6 +21,7 @@ Pierwsze moduły projektu:
 - [08 — Szkielet mapy kontynentalnej](docs/08-szkielet-mapy-kontynentalnej.md)
 - [09 — Reguły generowania szkieletu mapy](docs/09-reguly-generowania-szkieletu-mapy.md)
 - [10 — Układ 40 kafli mapy](docs/10-uklad-40-kafli-mapy.md)
+- [11 — Ruch i jednostki](docs/11-ruch-i-jednostki.md)
 
 ## Prototypy
 
