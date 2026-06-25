@@ -16,6 +16,7 @@ Generator tworzy:
 - równiny, lasy, wzgórza, góry, jeziora, suchy region i cuda naturalne,
 - starty graczy na lądzie,
 - żetony odkryć poza strefami startowymi,
+- roboczy podgląd **40 kafli po 7 heksów**,
 - pliki SVG z mapą,
 - pliki JSON z danymi mapy,
 - plik `index.html` do szybkiego podglądu.
@@ -50,6 +51,23 @@ index.html
 ```bash
 python prototypes/map-generator/generate_map.py --count 10 --output outputs/mapy-testowe
 ```
+
+## Podgląd granic 40 kafli
+
+Żeby zobaczyć granice kafli, użyj:
+
+```bash
+python prototypes/map-generator/generate_map.py --show-tiles --count 10 --output outputs/mapy-kafle
+```
+
+Wtedy SVG pokaże:
+
+- granice 40 kafli,
+- oznaczenia kafli `A1`–`E8`,
+- roboczy typ kafla, np. `START`, `LAD`, `WYBRZ`, `OCEAN`, `SPEC`, `TRUD`,
+- każdy kafel będzie miał dokładnie 7 heksów w danych JSON.
+
+Uwaga: to nadal jest roboczy podział kafli na aktualnej siatce 20 × 14. Docelowy układ fizycznych kafli będziemy jeszcze dopracowywać.
 
 ## Przykład: mniej albo więcej lądu
 
@@ -101,9 +119,9 @@ Folder `outputs/` jest ignorowany przez Git i nie powinien trafiać do repozytor
 
 ## Status
 
-Status: **prototyp 0.2**
+Status: **prototyp 0.3**
 
-Ten generator nie jest jeszcze finalnym narzędziem. Służy do szybkiego testowania szkieletu mapy i rozmieszczenia terenów.
+Ten generator nie jest jeszcze finalnym narzędziem. Służy do szybkiego testowania szkieletu mapy, rozmieszczenia terenów i roboczego podziału na kafle.
 
 ## Następne kroki
 
@@ -112,6 +130,7 @@ Do dopracowania później:
 - dokładniejszy algorytm jednego spójnego kontynentu,
 - kontrola procentu lądu i wody,
 - lepsze rozmieszczenie startów,
+- dokładniejszy fizyczny układ kafli 7-heksowych,
 - eksport gotowych kafli 7-heksowych,
 - tryb generowania map z 40 kafli,
 - możliwość zapisywania wybranego wariantu jako oficjalna mapa testowa.
