@@ -1,14 +1,14 @@
 const fixedTerrainImages = {
   ocean: null,
-  coast: '../Grafiki/wybrzeze.png?v=4',
-  plains: '../Grafiki/rowniny.png?v=4',
-  forest: '../Grafiki/las.png?v=4',
-  hills: '../Grafiki/wzgorza.png?v=4',
-  mountain: '../Grafiki/gory.png?v=4',
-  desert: '../Grafiki/pustynia.png?v=4',
-  lake: '../Grafiki/obszar_zalewowy.png?v=4',
-  tundra: '../Grafiki/tundra.png?v=4',
-  natural: '../Grafiki/gory.png?v=4'
+  coast: 'Grafiki/wybrzeze.png?v=5',
+  plains: 'Grafiki/rowniny.png?v=5',
+  forest: 'Grafiki/las.png?v=5',
+  hills: 'Grafiki/wzgorza.png?v=5',
+  mountain: 'Grafiki/gory.png?v=5',
+  desert: 'Grafiki/pustynia.png?v=5',
+  lake: 'Grafiki/obszar_zalewowy.png?v=5',
+  tundra: 'Grafiki/tundra.png?v=5',
+  natural: 'Grafiki/gory.png?v=5'
 };
 
 function drawHex(col, row) {
