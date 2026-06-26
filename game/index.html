@@ -23,8 +23,8 @@
     <aside class="panel">
       <h2>Aktualny moduł</h2>
       <div class="module-box">
-        <strong>Render dużej mapy</strong>
-        <p>Testujemy dużą proceduralną połać terenu, a heksy zostają jako lekka nakładka logiczna.</p>
+        <strong>Kafle terenu</strong>
+        <p>Wracamy do osobnych grafik kafli terenu. Każdy heks będzie mógł dostać własny wariant grafiki.</p>
       </div>
 
       <h2>Stan gry</h2>
@@ -46,16 +46,13 @@
     </aside>
 
     <section class="board-wrap">
-      <div id="map-stage" class="map-stage">
-        <canvas id="terrain-render"></canvas>
-        <svg id="board" role="img" aria-label="Mapa heksowa gry Epoki Imperiów"></svg>
-      </div>
+      <svg id="board" role="img" aria-label="Mapa heksowa gry Epoki Imperiów"></svg>
     </section>
   </main>
 
   <script src="app.js"></script>
   <script src="biome-map.js"></script>
-  <script src="map-renderer/rendered-terrain.js"></script>
+  <script src="graphics-fix.js"></script>
   <script src="map-zoom.js"></script>
 </body>
 </html>
