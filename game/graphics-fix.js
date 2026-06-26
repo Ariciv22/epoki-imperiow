@@ -1,15 +1,17 @@
 const fixedTerrainImages = {
   ocean: null,
-  coast: 'Grafiki/wybrzeze.png?v=5',
-  plains: 'Grafiki/rowniny.png?v=5',
-  forest: 'Grafiki/las.png?v=5',
-  hills: 'Grafiki/wzgorza.png?v=5',
-  mountain: 'Grafiki/gory.png?v=5',
-  desert: 'Grafiki/pustynia.png?v=5',
-  lake: 'Grafiki/obszar_zalewowy.png?v=5',
-  tundra: 'Grafiki/tundra.png?v=5',
-  natural: 'Grafiki/gory.png?v=5'
+  coast: 'Grafiki/wybrzeze.png?v=6',
+  plains: 'Grafiki/rowniny.png?v=6',
+  forest: 'Grafiki/las.png?v=6',
+  hills: 'Grafiki/wzgorza.png?v=6',
+  mountain: 'Grafiki/gory.png?v=6',
+  desert: 'Grafiki/pustynia.png?v=6',
+  lake: 'Grafiki/obszar_zalewowy.png?v=6',
+  tundra: 'Grafiki/tundra.png?v=6',
+  natural: 'Grafiki/gory.png?v=6'
 };
+
+const HEX_IMAGE_SCALE = 1.28;
 
 function drawHex(col, row) {
   const type = state.terrain.get(key(col, row));
@@ -34,11 +36,13 @@ function drawHex(col, row) {
 
   const imageSrc = fixedTerrainImages[type];
   if (imageSrc) {
+    const imageWidth = HEX_SIZE * 2 * HEX_IMAGE_SCALE;
+    const imageHeight = Math.sqrt(3) * HEX_SIZE * HEX_IMAGE_SCALE;
     const img = createSvgElement('image', {
-      x: (x - HEX_SIZE).toFixed(1),
-      y: (y - (Math.sqrt(3) / 2) * HEX_SIZE).toFixed(1),
-      width: (HEX_SIZE * 2).toFixed(1),
-      height: (Math.sqrt(3) * HEX_SIZE).toFixed(1),
+      x: (x - imageWidth / 2).toFixed(1),
+      y: (y - imageHeight / 2).toFixed(1),
+      width: imageWidth.toFixed(1),
+      height: imageHeight.toFixed(1),
       href: imageSrc,
       'clip-path': `url(#${clipId})`,
       preserveAspectRatio: 'xMidYMid slice',
