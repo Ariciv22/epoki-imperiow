@@ -100,7 +100,8 @@ button {
   cursor: grabbing !important;
 }
 
-#board {
+.map-stage {
+  position: relative;
   width: 1120px;
   max-width: none;
   height: auto;
@@ -109,6 +110,27 @@ button {
   border: 18px solid transparent;
   border-image: repeating-linear-gradient(90deg, #3d210c 0 10px, #9a642b 10px 20px, #241306 20px 28px) 18;
   box-shadow: 0 12px 28px rgba(0,0,0,0.45);
+}
+
+#terrain-render,
+#board {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+#terrain-render {
+  position: relative;
+  z-index: 1;
+  background: #17364d;
+}
+
+#board {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  max-width: none;
+  background: transparent;
 }
 
 .hex-base { cursor: pointer; }
