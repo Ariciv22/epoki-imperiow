@@ -1,22 +1,22 @@
 const fixedTerrainImages = {
   ocean: null,
-  coast: 'Grafiki/wybrzeze.png?v=7',
-  plains: 'Grafiki/rowniny.png?v=7',
-  forest: 'Grafiki/las.png?v=7',
-  hills: 'Grafiki/wzgorza.png?v=7',
-  mountain: 'Grafiki/gory.png?v=7',
-  desert: 'Grafiki/pustynia.png?v=7',
-  lake: 'Grafiki/obszar_zalewowy.png?v=7',
-  tundra: 'Grafiki/tundra.png?v=7',
-  natural: 'Grafiki/gory.png?v=7'
+  coast: 'Grafiki/wybrzeze.png?v=8',
+  plains: 'Grafiki/rowniny.png?v=8',
+  forest: 'Grafiki/las.png?v=8',
+  hills: 'Grafiki/wzgorza.png?v=8',
+  mountain: 'Grafiki/gory.png?v=8',
+  desert: 'Grafiki/pustynia.png?v=8',
+  lake: 'Grafiki/obszar_zalewowy.png?v=8',
+  tundra: 'Grafiki/tundra.png?v=8',
+  natural: 'Grafiki/gory.png?v=8'
 };
 
 const HEX_IMAGE_SCALE = 1.10;
 
 function imageHexPoints(cx, cy, size) {
-  const halfWidth = size * 0.88;
-  const halfTopWidth = size * 0.43;
-  const halfHeight = size * 0.77;
+  const halfWidth = size * 0.74;
+  const halfTopWidth = size * 0.34;
+  const halfHeight = size * 0.62;
 
   return [
     `${(cx + halfWidth).toFixed(1)},${cy.toFixed(1)}`,
