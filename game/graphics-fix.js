@@ -1,22 +1,37 @@
 const fixedTerrainImages = {
   ocean: null,
-  coast: 'Grafiki/wybrzeze.png?v=6',
-  plains: 'Grafiki/rowniny.png?v=6',
-  forest: 'Grafiki/las.png?v=6',
-  hills: 'Grafiki/wzgorza.png?v=6',
-  mountain: 'Grafiki/gory.png?v=6',
-  desert: 'Grafiki/pustynia.png?v=6',
-  lake: 'Grafiki/obszar_zalewowy.png?v=6',
-  tundra: 'Grafiki/tundra.png?v=6',
-  natural: 'Grafiki/gory.png?v=6'
+  coast: 'Grafiki/wybrzeze.png?v=7',
+  plains: 'Grafiki/rowniny.png?v=7',
+  forest: 'Grafiki/las.png?v=7',
+  hills: 'Grafiki/wzgorza.png?v=7',
+  mountain: 'Grafiki/gory.png?v=7',
+  desert: 'Grafiki/pustynia.png?v=7',
+  lake: 'Grafiki/obszar_zalewowy.png?v=7',
+  tundra: 'Grafiki/tundra.png?v=7',
+  natural: 'Grafiki/gory.png?v=7'
 };
 
-const HEX_IMAGE_SCALE = 1.28;
+const HEX_IMAGE_SCALE = 1.10;
+
+function imageHexPoints(cx, cy, size) {
+  const halfWidth = size * 0.88;
+  const halfTopWidth = size * 0.43;
+  const halfHeight = size * 0.77;
+
+  return [
+    `${(cx + halfWidth).toFixed(1)},${cy.toFixed(1)}`,
+    `${(cx + halfTopWidth).toFixed(1)},${(cy - halfHeight).toFixed(1)}`,
+    `${(cx - halfTopWidth).toFixed(1)},${(cy - halfHeight).toFixed(1)}`,
+    `${(cx - halfWidth).toFixed(1)},${cy.toFixed(1)}`,
+    `${(cx - halfTopWidth).toFixed(1)},${(cy + halfHeight).toFixed(1)}`,
+    `${(cx + halfTopWidth).toFixed(1)},${(cy + halfHeight).toFixed(1)}`
+  ].join(' ');
+}
 
 function drawHex(col, row) {
   const type = state.terrain.get(key(col, row));
   const { x, y } = hexCenter(col, row);
-  const points = hexPoints(x, y, HEX_SIZE * 0.96);
+  const points = imageHexPoints(x, y, HEX_SIZE);
   const clipId = `hex-clip-fixed-${col}-${row}`;
   const defs = board.querySelector('defs');
 
