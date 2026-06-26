@@ -1,22 +1,26 @@
 const fixedTerrainImages = {
   ocean: null,
-  coast: 'Grafiki/wybrzeze.png?v=8',
-  plains: 'Grafiki/rowniny.png?v=8',
-  forest: 'Grafiki/las.png?v=8',
-  hills: 'Grafiki/wzgorza.png?v=8',
-  mountain: 'Grafiki/gory.png?v=8',
-  desert: 'Grafiki/pustynia.png?v=8',
-  lake: 'Grafiki/obszar_zalewowy.png?v=8',
-  tundra: 'Grafiki/tundra.png?v=8',
-  natural: 'Grafiki/gory.png?v=8'
+  coast: 'Grafiki/wybrzeze.png?v=9',
+  plains: 'Grafiki/rowniny.png?v=9',
+  forest: 'Grafiki/las.png?v=9',
+  hills: 'Grafiki/wzgorza.png?v=9',
+  mountain: 'Grafiki/gory.png?v=9',
+  desert: 'Grafiki/pustynia.png?v=9',
+  lake: 'Grafiki/obszar_zalewowy.png?v=9',
+  tundra: 'Grafiki/tundra.png?v=9',
+  natural: 'Grafiki/gory.png?v=9'
 };
 
 const HEX_IMAGE_SCALE = 1.10;
 
-function imageHexPoints(cx, cy, size) {
-  const halfWidth = size * 0.74;
-  const halfTopWidth = size * 0.34;
-  const halfHeight = size * 0.62;
+function boardHexPoints(cx, cy, size) {
+  return hexPoints(cx, cy, size * 0.96);
+}
+
+function imageClipHexPoints(cx, cy, size) {
+  const halfWidth = size * 0.86;
+  const halfTopWidth = size * 0.50;
+  const halfHeight = size * 0.78;
 
   return [
     `${(cx + halfWidth).toFixed(1)},${cy.toFixed(1)}`,
@@ -31,16 +35,17 @@ function imageHexPoints(cx, cy, size) {
 function drawHex(col, row) {
   const type = state.terrain.get(key(col, row));
   const { x, y } = hexCenter(col, row);
-  const points = imageHexPoints(x, y, HEX_SIZE);
+  const boardPoints = boardHexPoints(x, y, HEX_SIZE);
+  const imageClipPoints = imageClipHexPoints(x, y, HEX_SIZE);
   const clipId = `hex-clip-fixed-${col}-${row}`;
   const defs = board.querySelector('defs');
 
   const clipPath = createSvgElement('clipPath', { id: clipId });
-  clipPath.appendChild(createSvgElement('polygon', { points }));
+  clipPath.appendChild(createSvgElement('polygon', { points: imageClipPoints }));
   defs.appendChild(clipPath);
 
   const base = createSvgElement('polygon', {
-    points,
+    points: boardPoints,
     fill: type === 'ocean' ? '#14314a' : (fallbackColors[type] || '#888'),
     class: 'hex-base',
     'data-col': col,
@@ -68,10 +73,10 @@ function drawHex(col, row) {
   }
 
   const border = createSvgElement('polygon', {
-    points,
+    points: boardPoints,
     fill: 'transparent',
-    stroke: type === 'ocean' || type === 'coast' ? '#1f5975' : '#26323a',
-    'stroke-width': type === 'ocean' ? '0.9' : '1.2',
+    stroke: type === 'ocean' || type === 'coast' ? '#2f6f93' : '#183849',
+    'stroke-width': type === 'ocean' ? '1.1' : '2.1',
     class: 'hex-border',
     'data-col': col,
     'data-row': row
