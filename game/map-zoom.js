@@ -1,5 +1,5 @@
 const MAP_BASE_WIDTH = 1120;
-const MAP_ZOOM_LEVELS = [1.45, 2.35, 3.45];
+const MAP_ZOOM_LEVELS = [1.15, 1.75, 2.6];
 let mapZoomIndex = 0;
 let isDraggingMap = false;
 let dragStartX = 0;
@@ -12,19 +12,23 @@ function getMapZoom() {
   return MAP_ZOOM_LEVELS[mapZoomIndex];
 }
 
+function getMapStage() {
+  return document.querySelector('#map-stage') || document.querySelector('#board');
+}
+
 function setBoardWidth(zoom) {
-  const board = document.querySelector('#board');
-  if (!board) return;
-  board.style.width = `${Math.round(MAP_BASE_WIDTH * zoom)}px`;
-  board.dataset.zoom = String(zoom);
+  const stage = getMapStage();
+  if (!stage) return;
+  stage.style.width = `${Math.round(MAP_BASE_WIDTH * zoom)}px`;
+  stage.dataset.zoom = String(zoom);
 }
 
 function applyMapZoomToPointer(nextZoom, pointerX, pointerY) {
   const boardWrap = document.querySelector('.board-wrap');
-  const board = document.querySelector('#board');
-  if (!boardWrap || !board) return;
+  const stage = getMapStage();
+  if (!boardWrap || !stage) return;
 
-  const previousZoom = Number(board.dataset.zoom || getMapZoom());
+  const previousZoom = Number(stage.dataset.zoom || getMapZoom());
   const rect = boardWrap.getBoundingClientRect();
 
   const localX = pointerX - rect.left;
